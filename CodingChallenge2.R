@@ -2,26 +2,14 @@
 
 MycotoxinData <- read.csv("MycotoxinData.csv",na.strings="na")
 
-##ggplot Example###
-ggplot(mtcars, aes(x=wt, y=mpg)) +  
-  geom_smooth(method = lm, se= FALSE, color="gray") + 
-  geom_point(aes(size= wt, color= hp)) + 
-  xlab("Weight") +
-  ylab("Miles per gallon")+
-  scale_color_gradient(low="green",high= "magenta")+
-  scale_x_log10() +
-  scale_y_continuous(labels = scales::percent) #changes y values to percent 
 
 ###Assignment 2###
 
-#Making a a boxplot with Treatment and DON variables 
-#Make a boxplot using ggplot with DON as the y variable, 
-#treatment as the x variable, and color mapped to the wheat cultivar. Show the code you use to load the libraries you need to read in the data and make the plot. Change the y label to “DON (ppm)” and make the x label blank.
 libary(ggplot2)
 
 #Question 2
 
-#making a box plot figure 
+#Make Box Plot of Treatment (x) and mycotoxins Deoxynivalenol (DON;y)
 ggplot(MycotoxinData, aes(x=Treatment, y=DON, color=Cultivar)) +
   geom_boxplot() +
   xlab("")+
@@ -29,7 +17,7 @@ ggplot(MycotoxinData, aes(x=Treatment, y=DON, color=Cultivar)) +
 
 #Question 3 
 
-#bar chart with standard-error error bars using the stat_summary() command.
+#Make Bar Chart with standard-error error bars using the stat_summary() command.
 libary(ggplot2)
 ggplot(MycotoxinData, aes(x=Treatment, y=DON, color= Cultivar)) +
   stat_summary(fun = mean, geom = "bar")+
@@ -40,63 +28,69 @@ ggplot(MycotoxinData, aes(x=Treatment, y=DON, color= Cultivar)) +
 
 
 #Question 4 
-#Set the shape = 21 and the outline color black (hint: use jitter_dodge). 
 
 #Adding points to the boxplot 
-ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar),color="black") +
-  geom_boxplot() + #if want to remove outliers there is a function for that
-  geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21)+
+ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar),color="black") + #filling in points by Cultivar, but outlining them in black
+  geom_boxplot(outlier.shape=NA) + 
+  geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21)+ #using jitterdoge to add random variation to point layout, using shape to change the circle shape
   xlab("")+
   ylab("DON (ppm)")
 
 #Adding point to the barchart
-libary(ggplot2)
-ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill= Cultivar),color="black") +
+#Use dodge in stat_summary features so points dodhge the bars and error bars
+ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill= Cultivar),color="black") +  #filling in points by Cultivar, but outlining them in black
   stat_summary(fun = mean, geom = "bar", position="dodge")+
-  stat_summary(fun.data=mean_se, geom = "errorbar",position = "dodge") +
-  geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21)+
+  stat_summary(fun.data=mean_se, geom = "errorbar",position = "dodge") + 
+  geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21)+ #using jitterdoge to add random variation to point layout, using shape to change the circle shape
   xlab("")+
   ylab("DON (ppm)")
 
 #Question 5 
-cbbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7","#000000")
-#Changing fill color of points and boxplots to match some colors in the following colorblind pallet. 
 
+#Saving a vector with colorblind colors 
+cbbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7","#000000")
+
+#Manually including colorblind colors for my cultivars using scale_fill_manual
 ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar)) +
-  geom_boxplot() + #if want to remove outliers there is a function for that
+  geom_boxplot(outlier.shape=NA) + #if want to remove outliers there is a function for that
   geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21)+
   scale_fill_manual(values = cbbPalette)+
   xlab("")+
   ylab("DON (ppm)")
 
 #Question 6
+
+#Separating out figures by cultivar 
 ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar)) +
-  geom_boxplot() + #if want to remove outliers there is a function for that
+  geom_boxplot(outlier.shape=NA) + #if want to remove outliers there is a function for that
   geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21)+
   scale_fill_manual(values = cbbPalette)+
   xlab("")+
   ylab("DON (ppm)")+
-  facet_wrap(~Cultivar)
+  facet_wrap(~Cultivar) #making separate panels by Cultivar
 
 #Question 7
-#Add transparency to the points so you can still see the boxplot or bar in the background. 
 
+#Add transparency to the points so you can still see the boxplot or bar in the background. 
 ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar)) +
-  geom_boxplot() + #if want to remove outliers there is a function for that
-  geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21,alpha=0.2)+
+  geom_boxplot(outlier.shape=NA) + #if want to remove outliers there is a function for that
+  geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21,alpha=0.25)+ #use alpha to crate transparency of points
   scale_fill_manual(values = cbbPalette)+
   xlab("")+
   ylab("DON (ppm)")+
   facet_wrap(~Cultivar)
 
 #Question 8 
+
+#Violin plot with the y-values shown as a log scale
 ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar)) +
-  geom_violin(width=10) + #if want to remove outliers there is a function for that
+  geom_violin() + #violin plot
+  geom_jitter(position = position_jitterdodge(dodge.width=1))+
+  scale_y_log10()+ #makes log(10) scale on the y -axis
   scale_fill_manual(values = cbbPalette)+
   xlab("")+
-  ylab("DON (ppm)")+
+  ylab("DON (ppm) in log10")+
   facet_wrap(~Cultivar)
-geom_violin() + geom_jitter(height = 0, width = 0.1)
 
 #Question 9 
 #sad0046@auburn.edu
