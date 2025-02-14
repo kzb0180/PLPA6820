@@ -25,8 +25,6 @@ ggplot(MycotoxinData, aes(x=Treatment, y=DON, color= Cultivar)) +
   xlab("")+
   ylab("DON (ppm)")
 
-
-
 #Question 4 
 
 #Adding points to the boxplot 
