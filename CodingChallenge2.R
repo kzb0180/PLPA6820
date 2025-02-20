@@ -20,10 +20,12 @@ ggplot(MycotoxinData, aes(x=Treatment, y=DON, color=Cultivar)) +
 #Make Bar Chart with standard-error error bars using the stat_summary() command.
 libary(ggplot2)
 ggplot(MycotoxinData, aes(x=Treatment, y=DON, color= Cultivar)) +
-  stat_summary(fun = mean, geom = "bar")+
-  stat_summary(fun.data=mean_se, geom = "errorbar") +
+  stat_summary(fun = mean, geom = "bar",position="dodge")+
+  stat_summary(fun.data=mean_se, geom = "errorbar",position="dodge") +
   xlab("")+
-  ylab("DON (ppm)")
+  ylab("DON (ppm)")+
+  geom_point(position = position_jitterdodge(dodge.width=0.9),shape=21)
+#go back and fix this so error bars do not overlap 
 
 #Question 4 
 
@@ -55,6 +57,8 @@ ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar)) +
   scale_fill_manual(values = cbbPalette)+
   xlab("")+
   ylab("DON (ppm)")
+#scale_fill_manual vs. scale_color_manual, color and fill both mapped to same variable, fill is inside, color is the outline
+#color that is not within an aes it will color everything
 
 #Question 6
 
