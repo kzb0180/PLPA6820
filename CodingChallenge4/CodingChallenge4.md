@@ -233,7 +233,8 @@ PLPA6820 repository.
 
 [**Link to my Github**](https://github.com/kzb0180/PLPA6820)
 
-**Note:** I have my repository saved as private. I have added you as a
-collaborator.When I tried this link it didn’t work, but it is correct.
-Here is the link typed out as well:
-<https://github.com/kzb0180/PLPA6820>
+**Note:** I had my repository saved as private and switched it to
+public. I have added you as a collaborator just in case.When I tried
+this link it didn’t work, but it is correct. Here is the link typed out
+as well: <https://github.com/kzb0180/PLPA6820>. Once I incorporate my
+lab’s data I will have to switch the repository back to private.
