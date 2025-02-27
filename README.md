@@ -1,18 +1,22 @@
 # README File 
 This is the very simple, README file for CodingChallenge4. I understand for my final project this will be much more elaborate to include all github flavored markdowns used in my final project. 
 
-## Links to Markdownfile for
+## Links to Markdownfile for CodingChallenge4
 
 [CodingChallenge4](CodingChallenge4\CodingChallenge4.md)
 
 ## File tree
+```r
+fs::dir_tree()
+```
+
 ├── BlakeRMardown_files
 │   ├── CodingChallenge2_IntroDataVis.docx
 │   ├── figure-gfm
 │   │   ├── Include figures-1.png
 │   │   └── pressure-1.png
 │   └── figure-html
-├── CodingChallenge4
+├── CodingChallenge4 #Location of files related to CodingChallenge4 Assignment
 │   ├── CodingChallenge4.md
 │   ├── CodingChallenge4.pdf
 │   ├── CodingChallenge4.Rmd
@@ -49,4 +53,5 @@ This is the very simple, README file for CodingChallenge4. I understand for my f
 ├── PLPA6820.Rproj
 ├── Project
 │   └── KylieBlake_ProjectProposal.docx
+├── README.html
 └── README.md
