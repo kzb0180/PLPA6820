@@ -1,0 +1,102 @@
+---
+title: "CodingChallenge4"
+author: "Kylie Blake"
+date: "2025-02-27"
+output:
+  md_document:
+    variant: gfm
+  pdf_document:
+    toc: true
+---
+# Coding Challenge 4
+
+## Manuscript
+
+[Noel, Z.A., Roze, L.V., Breunig, M., Trail, F. 2022. Endophytic fungi as promising biocontrol agent to protect wheat from Fusarium graminearum head blight. Plant Disease.https://doi.org/10.1094/PDIS-06-21-1253-RE](https://doi.org/10.1094/PDIS-06-21-1253-RE)
+
+Call in the required packages and dataset ("Housekeeping")
+```{r}
+#Calling in packages
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+library(tinytex)
+library(knitr)
+library(rmarkdown)
+library(pandoc)
+
+#Calling in Dataset
+MycotoxinData <- read.csv("MycotoxinData.csv",na.strings="na")
+
+#Call in Color Blind Palette for ggplot 
+cbbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7","#000000")
+```
+
+## Question 2
+
+### Plotting DON x Treatment
+```{r}
+DON <- ggplot(MycotoxinData, aes(x=Treatment, y=DON, fill=Cultivar)) + 
+  geom_boxplot(outlier.shape=NA) + 
+  geom_point(position = position_jitterdodge(dodge.width=0.9), shape=21,alpha=0.6)+ #jitter dodge points and make them transparent
+  scale_fill_manual(values = c(cbbPalette[[2]],cbbPalette[[3]]))+ #manually insert two colors from CbbPalette
+  xlab("")+ #label x-axis
+  ylab("DON (ppm)")+ #label y-axis
+  theme_classic() + #classic theme
+  facet_wrap(~Cultivar) #facet by Cultivar
+DON
+```
+
+### Plotting X15ADON x Treatment
+
+```{r}
+X15ADON <- ggplot(MycotoxinData, aes(x=Treatment, y=X15ADON, fill=Cultivar)) + 
+  geom_boxplot(outlier.shape=NA) + 
+  geom_point(position = position_jitterdodge(dodge.width=0.9), shape=21,alpha=0.6)+ #jitter dodge points and make them transparent
+  scale_fill_manual(values = c(cbbPalette[[2]],cbbPalette[[3]]))+ #manually insert two colors from CbbPalette
+  xlab("")+ #label x-axis
+  ylab("15ADON")+ #label y-axis
+  theme_classic() + #classic theme
+  facet_wrap(~Cultivar) #facet by Cultivar
+X15ADON
+```
+
+### Plotting MassperSeed_mg x Treatment
+```{r}
+MassperSeed <- ggplot(MycotoxinData, aes(x=Treatment, y=MassperSeed_mg, fill=Cultivar)) + 
+  geom_boxplot(outlier.shape=NA) + 
+  geom_point(position = position_jitterdodge(dodge.width=0.9), shape=21,alpha=0.6)+ #jitter dodge points and make them transparent
+  scale_fill_manual(values = c(cbbPalette[[2]],cbbPalette[[3]]))+ #manually insert two colors from CbbPalette
+  xlab("")+ #label x-axis
+  ylab("Seed Mass (mg)")+ #label y-axis
+  theme_classic() + #classic theme
+  facet_wrap(~Cultivar) #facet by Cultivar
+MassperSeed
+```
+
+### Use geom_pwc() to add t.test pairwise comparisons to the three plots made above. Combine three figures into group via ggarrange
+```{r}
+#Calculating t-tests for the three figures 
+Stat1 <-  DON +
+  geom_pwc(aes(group=Treatment), method = "t_test",label = "p.adj.format") #Adding t-test to Question 1 figure
+
+Stat2 <- X15ADON +
+  geom_pwc(aes(group=Treatment),method = "t_test",label = "p.adj.format")  #Adding t-test to Question 2 figure
+
+Stat3 <- MassperSeed +
+  geom_pwc(aes(group=Treatment),method = "t_test",label = "p.adj.format")  #Adding t-test to Question 3 figure
+
+#Plotting three figures with t-test calculations 
+figure1 <- ggarrange(
+  Stat1,  # First plot: water.imbibed
+  Stat2,  # Second plot: bac.even
+  Stat3,  # Third plot: water.imbibed.cor
+  labels = "auto",  # Automatically label the plots (A, B, C, etc.)
+  nrow = 1,  # Arrange the plots in 3 rows
+  ncol = 3,  # Arrange the plots in 1 column
+  common.legend = TRUE  # Do not include a legend in the combined figure
+)
+figure1
+```
+
+
