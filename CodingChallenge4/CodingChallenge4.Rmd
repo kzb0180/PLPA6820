@@ -3,10 +3,10 @@ title: "CodingChallenge4"
 author: "Kylie Blake"
 date: "2025-02-27"
 output:
-  md_document:
-    variant: gfm
   pdf_document:
     toc: true
+  md_document:
+    variant: gfm
 ---
 # Coding Challenge 4
 
