@@ -1,0 +1,87 @@
+---
+title: "BlakeRMarkdown"
+author: "Kylie Blake"
+date: "2025-02-26"
+output:
+  html_document:
+    toc: true #table of contents 
+    toc_float: true #makes a table of contents on side
+  md_document:
+    variant: gfm #makes a file github can understand so it is not read as an html document
+  pdf_document: default
+  word_document: default
+---
+Loading in packages:
+```{r}
+#YAMML header -> instruction on how to format doc
+#load in required packages
+library("tinytex")
+library("knitr")
+library("rmarkdown")
+library("pandoc")
+
+#We will be using Rmd to create reproducibility documents and copyright 
+```
+
+This is an example of R code
+
+```{r R code example, include=TRUE, echo=FALSE}
+#use green c button to get code chunk 
+#or do Ctrl-Alt-I 
+
+#show the code chunk (include = TRUEk but do not run it (echo=FALSE)
+
+summary(mtcars)
+```
+
+```{r Include figures}
+library(ggplot2)
+data("mtcars")
+ggplot(mtcars, aes(x=wt, y=mpg)) +
+  geom_point()
+```
+R markdown formatting options
+
+#First level header
+##Second level header
+###Third level header 
+
+##Types of text
+
+*this text is italic* 
+
+- Use asteriks to get *italic* text
+
+**this is bold** 
+
+- Use double asteriks to get **bold** text
+
+Blockquotes:
+Use ">" to start a quote
+
+> "I thoroughly disapprove of duels. If a man should challenge me,
+  I would take him kindly and forgivingly by the hand and lead him
+  to a quiet place and kill him."
+>
+> --- Mark Twain
+
+##Bullets 
+- one item
+- another item
+  - one sub item
+^ You can also do the above with numbers 
+
+##Links
+Put in a clickable link with brackets
+[Link to my github](https://github.com/kzb0180/PLPA6820)
+
+## Images
+![Shrek ggplot](shrek.jpg) 
+You must have the image in the same directory 
+
+## Formatted tables
+```{r}
+library(knitr)
+kable(mtcars, digits =3, format = "markdown")
+```
+
