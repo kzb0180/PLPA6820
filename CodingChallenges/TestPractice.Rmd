@@ -1,0 +1,143 @@
+---
+title: "PLPA6820_Study"
+author: "Kylie Blake"
+date: "2025-03-04"
+output: 
+  html_document:
+    md_document:
+      variant: gfm
+---
+
+## Quiz Activity: R Programming Basics
+Question 1: Subsetting Data
+Using the subset function: How would you create a subset of the iris dataset where Species is "virginica"?
+```{r}
+data("iris")
+subset(iris[iris$Species=="virginica",])
+#can also do
+subset(iris, Species == "virginica")
+```
+
+
+Without using the subset function: How would you create the same subset using indexing?
+```{r}
+subset <- (iris[iris$Species=="virginica",])
+```
+
+Question 2: Mathematical Functions
+How would you calculate the median of Sepal.Width for the entire iris dataset?
+```{r}
+median(iris$Sepal.Width)
+```
+
+
+How would you find the variance of Petal.Length for the "setosa" species?
+```{r}
+setosa_subset <- subset(iris, Species == "setosa")
+var(setosa_subset$Petal.Length)
+```
+
+
+Question 3: Data Visualization with ggplot2
+How would you create a histogram of Sepal.Length using ggplot2?
+```{r}
+library(ggplot2)
+ggplot(iris, aes(x=Sepal.Length))+
+  geom_histogram()
+```
+
+
+How would you create a line plot of Petal.Width vs Petal.Length, colored by Species?
+```{r}
+ggplot(iris, aes(x=Petal.Length, y=Petal.Width, color=Species))+
+  geom_smooth()
+```
+## Extended Quiz Activity: R Programming Basics
+Question 1: Subsetting Data
+Using the subset function: How would you create a subset of the iris dataset where Sepal.Length is greater than 6?
+```{r}
+subset_Sepal.Length <- subset(iris, Sepal.Length >6)
+subset_Sepal.Length2 <- iris[iris$Sepal.Length>6,]
+```
+
+Without using the subset function: How would you create the same subset using indexing?
+```{r}
+subset_Sepal.Length2 <- iris[iris$Sepal.Length>6,]
+```
+
+
+Using the dplyr package: How would you create a subset of the iris dataset where Petal.Width is less than 1.5?
+```{r}
+library(dplyr)
+
+iris %>%
+  filter(Petal.Width<1.5)
+```
+
+
+Question 2: Mathematical Functions
+How would you calculate the range of Sepal.Width for the entire iris dataset?
+```{r}
+range(iris$Sepal.Width)
+```
+
+
+How would you find the interquartile range (IQR) of Petal.Length for the "versicolor" species?
+```{r}
+subset_PL <- iris[iris$Species == "versicolor",]
+IQR(subset_PL$Petal.Length)
+```
+
+How would you calculate the sum of Sepal.Length for the "setosa" species?
+```{r}
+subset_SL <- iris[iris$Species == "setosa",]
+iris_SL <- subset(iris, Species == "setosa")
+sum(subset_SL$Sepal.Length)
+sum(iris_SL$Sepal.Length)
+```
+
+Question 3: Data Manipulation
+Using the dplyr package: How would you add a new column to the iris dataset that contains the ratio of Sepal.Length to Sepal.Width?
+```{r}
+library(dplyr)
+iris_new <- iris %>% 
+  mutate(Sepal.Ratio = Sepal.Length/Sepal.Width)
+  
+```
+
+
+Using the dplyr package: How would you group the iris dataset by Species and calculate the mean Petal.Length for each species?
+```{r}
+library(dplyr)
+
+mean_PL <- iris %>% 
+  group_by(Species) %>% 
+  summarise(mean_PL = mean(Petal.Length))
+```
+
+
+Question 4: Data Visualization with ggplot2
+How would you create a bar plot of the count of each Species using ggplot2?
+```{r}
+ggplot(iris, aes(x=Species, fill=Species))+
+  geom_bar()+
+  labs(x="Species", y="count")
+```
+
+
+How would you create a density plot of Sepal.Length, filled by Species?
+```{r}
+ggplot(iris, aes(x=Sepal.Length, fill = Species))+
+  geom_density()
+```
+
+
+How would you create a faceted scatter plot of Petal.Length vs Petal.Width, with each facet representing a different Species?
+```{r}
+ggplot(iris, aes(x=Petal.Length, y=Petal.Width))+
+  geom_point()+
+  geom_jitter() +
+  facet_wrap(~Species)
+```
+
+
