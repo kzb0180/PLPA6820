@@ -1,12 +1,12 @@
 ---
-title: "DataWrangling"
+title: "Data Wrangling"
 author: "Kylie Blake"
 date: "2025-03-17"
-output: html_document:
-  md_document:
-    variant: gfm
+output:
   pdf_document:
     toc: true
+  md_document:
+    variant: gfm
   html_document:
     toc: true
     df_print: paged
