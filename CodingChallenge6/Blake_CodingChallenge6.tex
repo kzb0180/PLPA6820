@@ -1,0 +1,382 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={CodingChallenge6},
+  pdfauthor={Kylie Blake},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{CodingChallenge6}
+\author{Kylie Blake}
+\date{2025-03-27}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\section{Question 1}\label{question-1}
+
+\textbf{1. 2 pts. Regarding reproducibility, what is the main point of
+writing your own functions and iterations? }
+
+\begin{itemize}
+\tightlist
+\item
+  The main point of writing your own functions and iterations in ragards
+  to reproducibility is that it reduces error from copy and pasting the
+  same function or entering the same values multiple times. A custom
+  function also improves consistency in your script and allows easier
+  modifications to code if edits are needed.
+\end{itemize}
+
+\section{Question 2}\label{question-2}
+
+\textbf{2. 2 pts. In your own words, describe how to write a function
+and a for loop in R and how they work. Give me specifics like syntax,
+where to write code, and how the results are returned.}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  Writing a function:
+\end{enumerate}
+
+\begin{itemize}
+\item
+  To write a function, you first need to give the function a name,
+  i.e.~NAME \textless- function(). This will store your function in the
+  Environment.
+\item
+  Second, you need to give the function an input name(s) or argument(s),
+  these arguments will be executed within the body of a function. Ex.
+  function(velocity, time)
+\item
+  Lastly, the ``tasks'' of the function sit inside curly brackets, and
+  are known as the body of the function. Ex. function(velocity, time)\{
+  distance \textless- (velocity * time) return(distance) \}
+\item
+  To see the calculated distance in the console, you would tell the
+  function to return() that variable.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Writing a for loop:
+\end{enumerate}
+
+In simplest terms, a for loop executes a task for every itemp in a
+sequence, and continues running that task until the last value in the
+sequence is reached.
+
+\begin{itemize}
+\item
+  The first component of the loop is setting defining the sequence. The
+  sequence may be numeric or characters. The syntax is always the same
+  for(variable in vector). The variable can be named whatever name you
+  prefer. For example ``for(i in 1:10)'' is saying for variable i in the
+  sequence 1 through 10, or set variable i equal to 1:10.
+\item
+  Secondly, you need to give the for loop a task to do, which will sit
+  in the body of the for loop. Again the body is represented with curly
+  brackets. ex. for (i in 1:10) \{print(i+2)\}. This is saying take
+  values 1 through 10 and add two to each value in the sequence.
+\item
+  For loops can become more complex by saving outputted values into a
+  dataframe. In this situation, you would define a dataframe prior to
+  executing the for loop with no values. ex. Table \textless- NULL. You
+  would then define a dataframe for values within the body of the for
+  loop.
+\end{itemize}
+
+\section{Question 3}\label{question-3}
+
+\textbf{3. 2 pts. Read in the Cities.csv file from Canvas using a
+relative file path.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Cities }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"CodingChallenge6/Cities.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Question 4}\label{question-4}
+
+\textbf{4. 6 pts. Write a function to calculate the distance between two
+pairs of coordinates based on the Haversine formula (see below). The
+input into the function should be lat1, lon1, lat2, and lon2. The
+function should return the object distance\_km. All the code below needs
+to go into the function.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Function }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(lat1, lon1, lat2,lon2)\{}
+\CommentTok{\# convert to radians}
+\NormalTok{rad.lat1 }\OtherTok{\textless{}{-}}\NormalTok{ lat1 }\SpecialCharTok{*}\NormalTok{ pi}\SpecialCharTok{/}\DecValTok{180}
+\NormalTok{rad.lon1 }\OtherTok{\textless{}{-}}\NormalTok{ lon1 }\SpecialCharTok{*}\NormalTok{ pi}\SpecialCharTok{/}\DecValTok{180}
+\NormalTok{rad.lat2 }\OtherTok{\textless{}{-}}\NormalTok{ lat2 }\SpecialCharTok{*}\NormalTok{ pi}\SpecialCharTok{/}\DecValTok{180}
+\NormalTok{rad.lon2 }\OtherTok{\textless{}{-}}\NormalTok{ lon2 }\SpecialCharTok{*}\NormalTok{ pi}\SpecialCharTok{/}\DecValTok{180}
+
+\CommentTok{\# Haversine formula}
+\NormalTok{delta\_lat }\OtherTok{\textless{}{-}}\NormalTok{ rad.lat2 }\SpecialCharTok{{-}}\NormalTok{ rad.lat1}
+\NormalTok{delta\_lon }\OtherTok{\textless{}{-}}\NormalTok{ rad.lon2 }\SpecialCharTok{{-}}\NormalTok{ rad.lon1}
+\NormalTok{a }\OtherTok{\textless{}{-}} \FunctionTok{sin}\NormalTok{(delta\_lat }\SpecialCharTok{/} \DecValTok{2}\NormalTok{)}\SpecialCharTok{\^{}}\DecValTok{2} \SpecialCharTok{+} \FunctionTok{cos}\NormalTok{(rad.lat1) }\SpecialCharTok{*} \FunctionTok{cos}\NormalTok{(rad.lat2) }\SpecialCharTok{*} \FunctionTok{sin}\NormalTok{(delta\_lon }\SpecialCharTok{/} \DecValTok{2}\NormalTok{)}\SpecialCharTok{\^{}}\DecValTok{2}
+\NormalTok{c }\OtherTok{\textless{}{-}} \DecValTok{2} \SpecialCharTok{*} \FunctionTok{asin}\NormalTok{(}\FunctionTok{sqrt}\NormalTok{(a)) }
+
+\CommentTok{\# Earth\textquotesingle{}s radius in kilometers}
+\NormalTok{earth\_radius }\OtherTok{\textless{}{-}} \DecValTok{6378137}
+
+\CommentTok{\# Calculate the distance}
+\NormalTok{distance\_km }\OtherTok{\textless{}{-}}\NormalTok{ (earth\_radius }\SpecialCharTok{*}\NormalTok{ c)}\SpecialCharTok{/}\DecValTok{1000}
+
+\FunctionTok{return}\NormalTok{(distance\_km) \}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Question 5}\label{question-5}
+
+\textbf{5. 5 pts. Using your function, compute the distance between
+Auburn, AL and New York City }
+
+\textbf{a. Subset/filter the Cities.csv data to include only the
+latitude and longitude values you need and input as input to your
+function.}
+
+\textbf{b. The output of your function should be 1367.854 km}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Part a}
+\CommentTok{\#Subset out nyc data and Auburn data}
+\NormalTok{nyc }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(Cities, city }\SpecialCharTok{==} \StringTok{"New York"}\NormalTok{)}
+\NormalTok{auburn }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(Cities, city }\SpecialCharTok{==} \StringTok{"Auburn"}\NormalTok{)}
+
+\NormalTok{lat1 }\OtherTok{\textless{}{-}}\NormalTok{ nyc}\SpecialCharTok{$}\NormalTok{lat}
+\NormalTok{lon1 }\OtherTok{\textless{}{-}}\NormalTok{ nyc}\SpecialCharTok{$}\NormalTok{long}
+\NormalTok{lat2 }\OtherTok{\textless{}{-}}\NormalTok{ auburn}\SpecialCharTok{$}\NormalTok{lat}
+\NormalTok{lon2 }\OtherTok{\textless{}{-}}\NormalTok{ auburn}\SpecialCharTok{$}\NormalTok{long}
+
+\CommentTok{\#Part b {-} Calculate distance from NYC to Auburn}
+\NormalTok{distance\_km }\OtherTok{\textless{}{-}} \FunctionTok{Function}\NormalTok{(lat1, lon1, lat2, lon2)}
+\FunctionTok{print}\NormalTok{(distance\_km)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1367.854
+\end{verbatim}
+
+\section{Question 6}\label{question-6}
+
+\textbf{6. 6 pts. Now, use your function within a for loop to calculate
+the distance between all other cities in the data. The output of the
+first 9 iterations is shown below. }
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#list city names }
+\NormalTok{city\_name }\OtherTok{\textless{}{-}}\NormalTok{ Cities}\SpecialCharTok{$}\NormalTok{city}
+\NormalTok{city\_name}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "New York"      "Los Angeles"   "Chicago"       "Miami"        
+##  [5] "Houston"       "Dallas"        "Philadelphia"  "Atlanta"      
+##  [9] "Washington"    "Boston"        "Phoenix"       "Detroit"      
+## [13] "Seattle"       "San Francisco" "San Diego"     "Minneapolis"  
+## [17] "Tampa"         "Brooklyn"      "Denver"        "Queens"       
+## [21] "Riverside"     "Las Vegas"     "Baltimore"     "St. Louis"    
+## [25] "Portland"      "San Antonio"   "Sacramento"    "Austin"       
+## [29] "Orlando"       "San Juan"      "San Jose"      "Indianapolis" 
+## [33] "Pittsburgh"    "Cincinnati"    "Manhattan"     "Kansas City"  
+## [37] "Cleveland"     "Columbus"      "Bronx"         "Auburn"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(city\_name))\{}
+\NormalTok{all\_cities }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(Cities, city }\SpecialCharTok{==}\NormalTok{ city\_name[i]) }\CommentTok{\#Go through all city names for i}
+\NormalTok{  lat1 }\OtherTok{\textless{}{-}}\NormalTok{ all\_cities}\SpecialCharTok{$}\NormalTok{lat }
+\NormalTok{  lon1 }\OtherTok{\textless{}{-}}\NormalTok{ all\_cities}\SpecialCharTok{$}\NormalTok{long}
+\NormalTok{  lat2 }\OtherTok{\textless{}{-}}\NormalTok{ auburn}\SpecialCharTok{$}\NormalTok{lat}
+\NormalTok{  lon2 }\OtherTok{\textless{}{-}}\NormalTok{ auburn}\SpecialCharTok{$}\NormalTok{long}
+  
+\NormalTok{distance\_km }\OtherTok{\textless{}{-}} \FunctionTok{Function}\NormalTok{(lat1, lon1, lat2, lon2)}
+\FunctionTok{print}\NormalTok{(distance\_km)\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1367.854
+## [1] 3051.838
+## [1] 1045.521
+## [1] 916.4138
+## [1] 993.0298
+## [1] 1056.022
+## [1] 1239.973
+## [1] 162.5121
+## [1] 1036.99
+## [1] 1665.699
+## [1] 2476.255
+## [1] 1108.229
+## [1] 3507.959
+## [1] 3388.366
+## [1] 2951.382
+## [1] 1530.2
+## [1] 591.1181
+## [1] 1363.207
+## [1] 1909.79
+## [1] 1380.138
+## [1] 2961.12
+## [1] 2752.814
+## [1] 1092.259
+## [1] 796.7541
+## [1] 3479.538
+## [1] 1290.549
+## [1] 3301.992
+## [1] 1191.666
+## [1] 608.2035
+## [1] 2504.631
+## [1] 3337.278
+## [1] 800.1452
+## [1] 1001.088
+## [1] 732.5906
+## [1] 1371.163
+## [1] 1091.897
+## [1] 1043.273
+## [1] 851.3423
+## [1] 1382.372
+## [1] 0
+\end{verbatim}
+
+\section{Bonus}\label{bonus}
+
+\textbf{Bonus point if you can have the output of each iteration append
+a new row to a dataframe, generating a new column of data. In other
+words, the loop should create a dataframe with three columns called
+city1, city2, and distance\_km, as shown below. The first six rows of
+the dataframe are shown below.}
+
+\begin{itemize}
+\tightlist
+\item
+  I could not figure this out! If we could break it down in class, I
+  would appreciate that!
+\end{itemize}
+
+\section{Question 7}\label{question-7}
+
+\textbf{7. 2 pts. Commit and push a gfm .md file to GitHub inside a
+directory called Coding Challenge 6. Provide me a link to your github
+written as a clickable link in your .pdf or .docx}
+
+\emph{\href{https://github.com/kzb0180}{Click here to my GitHub}}
+
+\end{document}
