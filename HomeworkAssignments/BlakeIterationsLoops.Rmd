@@ -1,0 +1,114 @@
+---
+title: "Blake_Iter+Func"
+author: "Kylie Blake"
+date: "2025-03-26"
+output:
+  pdf_document:
+    toc: true
+  md_document:
+    variant: gfm
+---
+
+1. Load in necessary packages 
+```{r}
+library(ggplot2)
+library(drc)
+library(tidyverse)
+```
+
+# Functions
+```{r}
+#Learning about functions
+#(5*degree_f - 32)/9
+#Calculating Celsius:
+(5*(32 - 32)/9)
+(5*(36 - 32)/9)
+(5*(39 - 32)/9)
+```
+Rather than copy and pasting the same equation and changing the degree_f value, which can lead to typos, we can create a function instead. 
+
+### Sample function
+
+> sample.function <- function(... variable goes here ...){
+  .... code goes here.... 
+  return(... output ...)
+} 
+
+```{r}
+# Name a function
+F_to_C <- function(f_temp){
+ celsius <- (5*(f_temp -32)/9)
+ return(celsius)
+} 
+#in parentheses put the input for that function, it can be anything
+#input f_temp into this caluculation, save that resulting value as Celsius, then return that value 
+
+#To use the function:Enter a value you want converted from Fahrenheit to Celsius
+F_to_C(32) 
+F_to_C(90)
+```
+# Iterations
+- Useful for reproducibility to prevent copy and paste errors
+
+```{r}
+#Repetition:
+rep("A",3) 
+rep(c("A","B"), 10)
+rep(c(1,2,5,3), 4, each =5) #repeat sequence of numbers 4 times with each number repeated 5 times 
+```
+```{r}
+#Sequence: sequence of #s
+
+1:7 #this is a sequence, but use seq() as get more complicated 
+seq(from=1, to =7)
+seq(from= 0, to = 10, by=2)
+```
+```{r}
+#Seq_along: allows you to generate sequence of numbers based on character vector 
+
+LETTERS #gives alphabet of characters
+
+seq_along(LETTERS) #counts number of characters as sequence 
+```
+# The for loop
+**For loop:** sets up iteration of initialization 
+Ask question: Is that sequence over? Will repeat 
+
+
+**Example 1**
+
+```{r}
+for (i in 1:10) {
+print(i*2)  
+}
+```
+Note: Inside parentheses for for loop we define our iteration. Usually use an i as general syntax. Setting i = 1 through 10. Print ix2 so essentially 1 through 10 x2. You use print so you can see the result in the console. 
+
+**Example 2**
+```{r}
+#Caluclate Fahrenheit for each value -30 through 100
+for (i in -30:100){
+  result <- F_to_C(i)
+  print(result)
+}
+
+#To store values from for loop
+
+# Initialize an empty data frame to store the results
+celsius.df <- NULL
+
+# Loop through the range of temperatures from -30 to 100
+for (i in -30:100) {
+  # Convert the current temperature from Fahrenheit to Celsius and store it in a data frame
+  result <- data.frame(F_to_C(i), i)
+  
+  # Add the result to the celsius.df data frame
+  celsius.df <- rbind.data.frame(celsius.df, result)
+  
+  # Print the current result
+  print(result)
+}
+
+print(celsius.df)
+```
+
