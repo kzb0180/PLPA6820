@@ -145,7 +145,7 @@ lsmeans <- emmeans(lm3, ~ GrowthStage)
 # Display the estimated marginal means, along with their upper and lower confidence intervals
 lsmeans
 
-# Set up a compact letter display to perform pairwise comparisons of the estimated marginal means
+# Set up a compact letter display to perform pairwise comparisons of the estimated marginal means (Tukey separation)
 # This will help identify which groups are significantly different from each other
 results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
 
@@ -192,7 +192,7 @@ lsmeans
 results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
 
 # Display the results of the pairwise comparisons, indicating groups that do not share
-# the same letters are statistically significantly different from each other
+# the same numbers are statistically significantly different from each other, which is only seens in GrowthState = V8 between control and fungicide
 results_lsmeans
 
 # Visualize the interaction terms using ggplot2

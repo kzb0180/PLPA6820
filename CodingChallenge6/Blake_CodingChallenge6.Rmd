@@ -128,6 +128,15 @@ print(distance_km)}
 
 - I could not figure this out! If we could break it down in class, I would appreciate that! 
 
+```{r}
+unique_cities <-  unites(cities$city)
+lat.auburn <- cities$lat[cities$city =="Auburn",]
+lon.auburn <- cities$long[cities$city =="Auburn",]
+
+for (i in seq_along(unique_citeis)){
+  #crat 1 row datafram containing info we want for each iteration of loop then use rbind data frame to cities2 <- rbind.data.frame
+}
+```
 
 # Question 7
 
