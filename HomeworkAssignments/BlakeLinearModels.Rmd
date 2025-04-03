@@ -1,0 +1,254 @@
+---
+title: "BlakeLinearModels"
+author: "Kylie Blake"
+date: "2025-04-02"
+output:
+  pdf_document:
+    toc: true
+  md_document:
+    variant: gfm
+---
+
+```{r}
+library(tidyverse)
+library(lme4)
+library(emmeans) #modeled means 
+library(multcomp) #multiple comparison
+
+```
+# Continuous X and Continuous Y
+Notes on Linear Regression: We run a linear model - or if it's a **continuous x variable and a continuous y variable**, we would call it a **regression**. If we consider it a **cause-and-effect** relationship, we may call it a **correlation.**
+
+```{r}
+#Load the 'mtcars' dataset
+data("mtcars")
+
+# Create a scatter plot of 'mpg' (miles per gallon) against 'wt' (weight) using ggplot2
+# Add a linear regression line (without confidence interval shading) and color points by 'wt'
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE, color = "grey") +  # Add linear regression line
+  geom_point(aes(color = wt)) +  # Add points colored by 'wt'
+  xlab("Weight") +  # Label x-axis
+  ylab("Miles per gallon") +  # Label y-axis
+  scale_color_gradient(low = "forestgreen", high = "black") +  # Color gradient for points
+  theme_classic()  # Use classic theme for the plot
+
+# Fit a linear model with 'mpg' as the response variable and 'wt' as the predictor
+lm1 <- lm(mpg ~ wt, data = mtcars)  # lm = linear model
+# This model gives the intercept (beta 0) and slope (beta 1) for 'wt'
+
+# Display the summary of the fitted linear model, which includes estimates of coefficients,
+# standard errors, t-values, p-values, and R-squared
+summary(lm1)
+
+# The summary indicates that the slope is not equal to 0, and the intercept estimate is reasonable.
+# R-squared tells you the proportion of variation in 'mpg' explained by 'wt' (about 74%).
+
+# Perform an ANOVA on the fitted linear model to analyze the variance and test the significance
+# of the predictor 'wt'
+anova(lm1)  # Regression analysis indicating that 'wt' is significant
+
+# The p-value in the ANOVA is the same as in the summary; linear regression and ANOVA are essentially
+# the same, and the value reported in the ANOVA is the value of the linear regression slope parameter.
+# This means that 'wt' has a significant effect on 'mpg'.
+
+# Perform a correlation test between 'wt' and 'mpg'
+cor.test(mtcars$wt, mtcars$mpg)
+
+# The p-value is the same again! This test gives you a different r value, which is the correlation
+# coefficient. The closer the r value is to -1 or 1, the stronger the correlation between the two variables.
+
+```
+##Assumptions
+Notes from Dr. Noel:
+In general, there are several assumptions in a regression, linear model, ANOVA, or whatever you want to call it.
+
+They are:
+
+- y is continuous
+- error is normally distributed 
+- relationship is linear 
+- homoskedasticity 
+- sigma is consistent 
+- independent samples
+However, regression/anovas/linear models are generally robust enough to moderate departures from the assumptions. So, do the assumptions matter… yeah, but only if they are terrible. However, in most cases, if one assumption is violated, it won't change the result too much. If anything, it will increase the p-value, and your conclusion is more conservative at that point.
+
+Yes, there are assumption tests, but we will not do them. You just need to know how to read your data and if you want look at the residual plot to diagnose your violated assumptions.
+
+In our example above we can simply get the residuals from our linear model like this
+
+# Categorical variables
+
+```{r}
+# Load the dataset 'Bull_richness.csv' into a data frame called 'bull.rich'
+bull.rich <- read.csv("CodingChallenges/Bull_richness.csv")
+
+# Filter the dataset to include only rows where GrowthStage is "V8" and Treatment is "Conv."
+bull.rich.sub <- bull.rich %>% 
+  filter(GrowthStage == "V8" & Treatment == "Conv.")
+
+# Perform a t-test to see if there's a difference in 'richness' depending on the fungicide used
+t.test(richness ~ Fungicide, data = bull.rich.sub)
+# The null hypothesis is that the difference in means is 0. We are trying to prove this wrong.
+# The p-value indicates whether the means are statistically significantly different from 0.
+
+# Display the summary of a linear model with 'richness' as the response variable and 'Fungicide' as the predictor
+summary(lm(richness ~ Fungicide, data = bull.rich.sub))
+# This provides another way to look at summary statistics, including estimates of coefficients,
+# standard errors, t-values, and p-values.
+
+# Perform an ANOVA on the fitted linear model to analyze the variance and test the significance
+# of the predictor 'Fungicide'
+anova(lm(richness ~ Fungicide, data = bull.rich.sub))
+
+# Assuming equal variance in groups, performing a two-sample t-test yields the same result as
+# a linear model and ANOVA on the linear model. The p-value tells us that the slope of the line
+# is different from 0, indicating a significant effect of 'Fungicide' on 'richness'.
+```
+
+#ANOVA
+
+```{r}
+# Filter the dataset 'bull.rich' to include only rows where Fungicide is "C",
+# Treatment is "Conv.", and Crop is "Corn"
+bull.rich.sub2 <- bull.rich %>%
+  filter(Fungicide == "C" & Treatment == "Conv." & Crop == "Corn")
+
+# Create a boxplot of 'richness' by 'GrowthStage' using ggplot2
+ggplot(bull.rich.sub2, aes(x = GrowthStage, y = richness)) +
+  geom_boxplot()
+
+# Fit a linear model with 'richness' as the response variable and 'GrowthStage' as the predictor
+lm3 <- lm(richness ~ GrowthStage, data = bull.rich.sub2)
+
+# Display the summary of the fitted linear model, which includes estimates of coefficients,
+# standard errors, t-values, and p-values
+summary(lm(richness ~ GrowthStage, data = bull.rich.sub2))
+# The summary indicates that the overall effect of 'GrowthStage' on 'richness' is significant.
+# This means the model is significant and fits well as a linear model.
+
+# To understand which groups are different from each other, perform an ANOVA on the fitted linear model
+anova(lm3)
+
+# The ANOVA table will report significant factors with confidence intervals (CI) and means.
+# Follow up with pairwise comparisons using a post hoc test to determine which specific groups
+# are significantly different from each other.
+```
+
+ Pos-hoc is basically individual t-tests across groups. The most versatile way to do this is with the packages emmeans, and multcomp. The lsmeans are the least squared means - the means estimated by the linear model. This contrasts the arithmetic means, which are the means calculated or the average.
+```{r}
+# Perform post-hoc test
+
+# Calculate the estimated marginal means (least-squares means) for 'GrowthStage' using the 'emmeans' package
+lsmeans <- emmeans(lm3, ~ GrowthStage)
+
+# Display the estimated marginal means, along with their upper and lower confidence intervals
+lsmeans
+
+# Set up a compact letter display to perform pairwise comparisons of the estimated marginal means
+# This will help identify which groups are significantly different from each other
+results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
+
+# Display the results of the pairwise comparisons, indicating groups that do not share
+# the same letters are statistically significantly different from each other
+results_lsmeans
+ 
+```
+
+#Interaction Term
+
+```{r}
+
+# Filter the dataset 'bull.rich' to include only rows where Treatment is "Conv." and Crop is "Corn"
+bull.rich.sub3 <- bull.rich %>% 
+  filter(Treatment == "Conv." & Crop == "Corn")
+
+# Fit a linear model with 'richness' as the response variable
+# 'GrowthStage' and 'Fungicide' as predictors, including their interaction
+lm.interaction <- lm(richness ~ GrowthStage * Fungicide, data = bull.rich.sub3)
+
+# Alternative way to write the model formula explicitly including the interaction term
+# lm.inter <- lm(richness ~ GrowthStage + Fungicide + GrowthStage:Fungicide, data = bull.rich.sub3)
+
+# Display the summary of the fitted model, which includes estimates of coefficients,
+# standard errors, t-values, and p-values
+summary(lm.interaction)
+
+# Perform an ANOVA on the fitted model to analyze the variance and test the significance
+# of the predictors and their interaction
+anova(lm.interaction)
+
+# ANOVA results indicate that the effect of Fungicide is significant and depends on the GrowthStage
+
+# Use the 'emmeans' package to calculate estimated marginal means (least-squares means)
+# for 'Fungicide' within each 'GrowthStage'
+lsmeans <- emmeans(lm.interaction, ~ Fungicide | GrowthStage)
+
+# Display the estimated marginal means, along with their upper and lower confidence intervals
+lsmeans
+
+# Use the 'cld' function to perform pairwise comparisons of the estimated marginal means
+# and determine which groups are significantly different from each other
+results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
+
+# Display the results of the pairwise comparisons, indicating groups that do not share
+# the same letters are statistically significantly different from each other
+results_lsmeans
+
+# Visualize the interaction terms using ggplot2
+# Create a boxplot of 'richness' by 'GrowthStage', colored by 'Fungicide'
+ggplot(bull.rich.sub3, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  geom_boxplot()
+
+```
+#Mixed Effect Models
+
+- Things that you want to generalize variation 
+- Fixed effect: if we care about effect of variables interactions
+
+Common fixed effects
+
+- Treatment
+- Species
+- gene
+
+Common random effects (blocking factor)
+- Year
+- replicate
+- trial
+- Individuals
+- Fields
+
+```{r}
+# Load the lme4 package to use linear mixed-effects models
+library(lme4)
+
+# Fit a linear mixed-effects model with 'richness' as the response variable
+# 'GrowthStage' and 'Fungicide' as fixed effects, and 'Rep' as a random effect
+lm.interaction2 <- lmer(richness ~ GrowthStage * Fungicide + (1 | Rep), data = bull.rich.sub3)
+
+# Display the summary of the fitted model, which includes estimates of fixed effects,
+# random effects, t-values, and standard errors
+summary(lm.interaction2)
+
+# Display the summary of fitted model to compare
+summary(lm.interaction)
+
+# Note: The summary does not provide p-values directly; focus on t-values and standard errors instead
+
+# Use the 'emmeans' package to calculate estimated marginal means (least-squares means)
+# for 'Fungicide' within each 'GrowthStage'
+lsmeans <- emmeans(lm.interaction2, ~ Fungicide | GrowthStage)
+
+# Display the estimated marginal means, along with their upper and lower confidence intervals
+lsmeans
+
+# Use the 'cld' function to perform pairwise comparisons of the estimated marginal means
+# and determine which groups are significantly different from each other
+results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
+
+# Display the results of the pairwise comparisons, indicating groups that do not share the same letters are statistically significantly different from each other
+results_lsmeans
+ 
+```
+
