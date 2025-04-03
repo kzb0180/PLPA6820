@@ -1,0 +1,136 @@
+---
+title: "CodingChallenge7"
+author: "Kylie Blake"
+date: "2025-04-03"
+output:
+  pdf_document:
+    toc: true
+  md_document:
+    variant: gfm
+---
+
+
+# Question 1
+
+**1.4 pts. Read in the data called “PlantEmergence.csv” using a relative file path and load the following libraries. tidyverse, lme4, emmeans, multcomp, and multcompView. Turn the Treatment , DaysAfterPlanting  and Rep into factors using the function as.factor**
+
+```{r}
+#STAND$Treatment <- as.factor(STAND$Treatment) # example shown here. 
+
+#Call in libraries
+library(tidyverse)
+library(lme4)
+library(emmeans)
+library(multcomp)
+library(multcompView)
+
+#Call in data and change variables into factors
+PlantEmergence <- read.csv("CodingChallenge7/PlantEmergence.csv")
+
+PlantEmergence$Treatment <- as.factor(PlantEmergence$Treatment)
+PlantEmergence$DaysAfterPlanting <-  as.factor(PlantEmergence$DaysAfterPlanting)
+PlantEmergence$Rep <- as.factor(PlantEmergence$Rep)
+```
+
+
+
+# Question 2
+
+**2.	5 pts. Fit a linear model to predict Emergence using Treatment and DaysAfterPlanting along with the interaction. Provide the summary of the linear model and ANOVA results.**
+
+```{r}
+#Example: lm.interaction <- lm(richness ~ GrowthStage * Fungicide, data = bull.rich.sub3), where * serves as a interaction between the two
+
+lm1 <- lm(Emergence ~ Treatment * DaysAfterPlanting, data = PlantEmergence)
+
+summary(lm1) #summary stats for all treatments, days, after planting, and their relationship
+anova(lm1) #testing if means of different groups are equal, see if ca, reject null 
+```
+
+# Question 3
+
+**3.	5 pts. Based on the results of the linear model in question 2, do you need to fit the interaction term? Provide a simplified linear model without the interaction term but still testing both main effects. Provide the summary and ANOVA results. Then, interpret the intercept and the coefficient for Treatment 2.**
+
+- No, you do not need to fit the interaction term Treatment:DaysAfterPlanting. The interaction between the two variables is not statistically significant (p-value>0.05).
+- The intercept (182.163) is the expected response of Emergence (the response variable) to the treatment (predictor variables Treatment + DaysAfterPlanting).The intercept here is saying that at Treatment 1, emergence occurs at 182.162 units. When Treatment 2 is applied, Emergence is expected to decrease by -134.531 units. 
+
+```{r}
+lm2 <- lm(Emergence ~ Treatment + DaysAfterPlanting, data = PlantEmergence) #plus is just looking at terms, not how relate to eachother 
+
+summary(lm2)
+anova(lm2)
+```
+# Question 4
+
+**4.	5 pts. Calculate the least square means for Treatment using the emmeans package and perform a Tukey separation with the compact letter display using the cld function. Interpret the results.**
+
+- The least square means are the adjusted means for each treatment by accounting for the other variable in the linear model (Days After Planting). The Tukey hok test tells us which groups, or treatments, are significanty different, meaning the treatment had an effect. Treatment 2 is significantly different (group 1) from other treatments and so is  , where as Treatment 7,1,9,and 4 all share the same group numbers and are not significantly different. 1,9,4,8,6,3,5 all share group 3 and are not significantly different. Lastly, 6,3,5 and not significantly different. Takeaways from this are that between treatments some has significant differences, where p<0.001 such as between Treatment 7 and 2, 1 and 2, 1 and 7, 9 and 2, etc.  
+```{r}
+#example: lsmeans <- emmeans(lm3, ~ GrowthStage)
+
+lsmeans <- emmeans(lm2, ~Treatment)
+lsmeans
+
+#Tukey separation 
+#example: results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
+
+results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
+results_lsmeans
+
+```
+# Question 5
+
+**5.4 pts. The provided function lets you dynamically add a linear model plus one factor from that model and plots a bar chart with letters denoting treatment differences. Use this model to generate the plot shown below. Explain the significance of the letters. **
+
+- In a Tukey hok test, groups with the same letter are not statistically significant differences in their means, whereas groups with the same letter have significantly different means. Therefore, in the bar chart, Treatments with the same letter, such as Treatment 3-6 do not have statistically significant differences in their means, or in the number of emerged plants after treatments. Treatments with different letters, such as Treatments 2 and 7, do have statistically significant means, meaning the average emerged plants was statistically significantly different between treatments 2 and 7. 
+
+```{r}
+library(ggplot2)
+
+lm_model <-  lm(Emergence ~ Treatment + DaysAfterPlanting, data = PlantEmergence)
+
+plot_cldbars_onefactor <- function(lm_model, factor) {
+  data <- lm_model$model
+  variables <- colnames(lm_model$model)
+  dependent_var <- variables[1]
+  independent_var <- variables[2:length(variables)]
+
+  lsmeans <- emmeans(lm_model, as.formula(paste("~", factor))) # estimate lsmeans 
+  Results_lsmeans <- cld(lsmeans, alpha = 0.05, reversed = TRUE, details = TRUE, Letters = letters) # contrast with Tukey adjustment by default.
+  
+  # Extracting the letters for the bars
+  sig.diff.letters <- data.frame(Results_lsmeans$emmeans[,1], 
+                                 str_trim(Results_lsmeans$emmeans[,7]))
+  colnames(sig.diff.letters) <- c(factor, "Letters")
+  
+  # for plotting with letters from significance test
+  ave_stand2 <- lm_model$model %>%
+    group_by(!!sym(factor)) %>%
+    dplyr::summarize(
+      ave.emerge = mean(.data[[dependent_var]], na.rm = TRUE),
+      se = sd(.data[[dependent_var]]) / sqrt(n())
+    ) %>%
+    left_join(sig.diff.letters, by = factor) %>%
+    mutate(letter_position = ave.emerge + 10 * se)
+  
+  plot <- ggplot(data, aes(x = !! sym(factor), y = !! sym(dependent_var))) + 
+    stat_summary(fun = mean, geom = "bar") +
+    stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+    ylab("Number of emerged plants") + 
+    geom_jitter(width = 0.02, alpha = 0.5) +
+    geom_text(data = ave_stand2, aes(label = Letters, y = letter_position), size = 5) +
+    xlab(as.character(factor)) +
+    theme_classic()
+  
+  return(plot)
+}
+
+plot_cldbars_onefactor(lm_model,"Treatment")
+
+```
+
+# Question 6 
+
+**2 pts. Generate the gfm .md file along with a .html, .docx, or .pdf. Commit, and push the .md file to github and turn in the .html, .docx, or .pdf to Canvas. Provide me a link here to your github.**
+
+*[Click here to my GitHub](https://github.com/kzb0180)*
