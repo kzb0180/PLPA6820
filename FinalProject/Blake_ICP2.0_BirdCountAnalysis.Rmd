@@ -7,6 +7,15 @@ output: html_document:
     variant: gfm
 ---
 
+Final project - you are to use your data from your PhD or Master's research or data from a paper you want to reproduce and write a reproducible workflow using these data. 
+
+History of evidence of integration with version control - 10 points 
+Creation of figures that are manuscript-ready - 25 points
+Use of reproducible and efficient coding techniques like functions, self-checks, R markdown, loops, and data simulation. - 50 points 
+Must have a README file - 10 points 
+Must be in an R project - 5 points 
+I or someone else must be able to download your project. run the code, have it make sense, and reproduce it! - 25 points
+
 ##Load in Packages and Excel Workbooks
 
 ```{r}
@@ -31,10 +40,10 @@ library(chngpt)    # For threshold regression
 
 ```{r}
 #Load in necessary workboooks
-surveys <- read_excel("tidyData\\birdsICP2.xlsx",sheet = "surveyLevel")  # Data containing survey-level information
-individuals <- read_excel("tidyData\\birdsICP2.xlsx",sheet = "individualLevel")
-points <- read_excel("tidyData\\vegICP2.xlsx",sheet = "pointLevel") #Data containing point-level information
-detections <- read_excel("tidyData\\birdsICP2.xlsx",sheet = "detectionLevel") #Data containing detection-level information
+surveys <- read_excel("FinalProject\\birdsICP2.xlsx",sheet = "surveyLevel")  # Data containing survey-level information
+individuals <- read_excel("FinalProject\\birdsICP2.xlsx",sheet = "individualLevel") #Data containing individual-level information
+points <- read_excel("FinalProject\\vegICP2.xlsx",sheet = "pointLevel") #Data containing point-level information
+detections <- read_excel("FinalProject\\birdsICP2.xlsx",sheet = "detectionLevel") #Data containing detection-level information
 
 detections = detections[, -1] # remove redundant data sheet number
  
@@ -51,7 +60,6 @@ Combining
 3. Add the individual level species data to the merged data from step 1. merge them by dataSheetNum, which links the Survey Level to individual level. 
 
 ```{r}
-##################MAY WANT TO MOVE THIS UP TO TIDY SECTION #####################
 # Convert date and time columns to single Date Time Column
 
 # Step 1: Convert Date from character to Date format
@@ -117,119 +125,63 @@ merged_data <- left_join(points, merged_data, by = "pointId2")
 ```
 
 
-#Species Specific Exporation
+#Species Specific Exploration
+Investigating the wildlife management areas and landcover types the focal species are on. 
 
-##NOBO 
-
-### NOBO Grouped by WMA, Landcover, and WMA & Landcover
+**INCLUDE HERE A TABLE OF THE LANDCOVEWR TYPES**
 
 ```{r}
+#Function to calculate focal species (Northern Bobwhite, Bachman's sparrow, Prairie Warbler, and American Kestrel)
+count_species_occurrences <- function(data, species_name, variable) {
+  # Filter data for the specified species
+  filtered_data <- data %>%
+    filter(species == species_name)
+  
+  # Group data by the specified variables and count occurrences
+  counts <- filtered_data %>%
+    group_by(across(all_of(variable))) %>%
+    summarise(count = n())
+  
+  # Print the counts
+  print(counts)
+  
+  return(counts)
+}
 
-################ WMA ##################
-#Count occurences of species "NOBO" grouped by WMA 
-nobo_counts_wma <- merged_data %>%
-  filter(species == "NOBO") %>%  # Retain only rows where species is "NOBO"
-  group_by(wma) %>%              # Group the data by WMA
-  summarise(count = n())         # Count the number of occurrences within each WMA group
+##################### Northern Bobwhite (NOBO) ##########################
+# Count occurrences of species "NOBO" grouped by WMA
+nobo_counts_wma <- count_species_occurrences(merged_data, "NOBO", c("wma"))
 
-# Print the counts of "NOBO" grouped by WMA
-print(nobo_counts_wma)
-
-
-################ Landcover ##################
 # Count occurrences of species "NOBO" grouped by landcover
-nobo_counts_landcover <- merged_data %>%
-  filter(species == "NOBO") %>%  # Retain only rows where species is "NOBO"
-  group_by(landcover) %>%        # Group the data by landcover
-  summarise(count = n())         # Count the number of occurrences within each landcover group
+nobo_counts_landcover <- count_species_occurrences(merged_data, "NOBO", c("landcover"))
 
-# Print the counts of "NOBO" grouped by landcover
-print(nobo_counts_landcover)
-
-################ WMA and Landcover ##################
 # Count occurrences of species "NOBO" grouped by both WMA and landcover
-nobo_counts_wma_landcover <- merged_data %>%
-  filter(species == "NOBO") %>%  # Retain only rows where species is "NOBO"
-  group_by(wma, landcover) %>%   # Group the data by WMA and landcover
-  summarise(count = n())         # Count the number of occurrences within each WMA-landcover group
+nobo_counts_wma_landcover <- count_species_occurrences(merged_data, "NOBO", c("wma", "landcover"))
 
-# Print the counts of "NOBO" grouped by WMA and landcover
-print(nobo_counts_wma_landcover)
+##################### Bachman's Sparrow (BACS) ##########################
+bacs_counts_wma <- count_species_occurrences(merged_data, "BACS", c("wma"))
+
+# Count occurrences of species "bacs" grouped by landcover
+bacs_counts_landcover <- count_species_occurrences(merged_data, "BACS", c("landcover"))
+
+# Count occurrences of species "NOBO" grouped by both WMA and landcover
+bacs_counts_wma_landcover <- count_species_occurrences(merged_data, "BACS", c("wma", "landcover"))
+
+##################### Prairie Warbler (PRAW) ##########################
+praw_counts_wma <- count_species_occurrences(merged_data, "PRAW", c("wma"))
+
+# Count occurrences of species "bacs" grouped by landcover
+praw_counts_landcover <- count_species_occurrences(merged_data, "PRAW", c("landcover"))
+
+# Count occurrences of species "NOBO" grouped by both WMA and landcover
+praw_counts_wma_landcover <- count_species_occurrences(merged_data, "PRAW", c("wma", "landcover"))
+
+##################### American Kestrel (AMKE) ##########################
+amke_counts_wma <- count_species_occurrences(merged_data, "AMKE", c("wma"))
+
+#Since there is only one American kestrel on one of the wildlife management areas, there will be no further analysis of this focal species. 
 ```
 
-## BACS
-
-### BACS Grouped by WMA, Landcover, and WMA & Landcover
-
-```{r}
-
-################ WMA ##################
-#Count occurences of species "BACS" grouped by WMA 
-BACS_counts_wma <- merged_data %>%
-  filter(species == "BACS") %>%  # Retain only rows where species is "BACS"
-  group_by(wma) %>%              # Group the data by WMA
-  summarise(count = n())         # Count the number of occurrences within each WMA group
-
-# Print the counts of "BACS" grouped by WMA
-print(BACS_counts_wma)
-
-################ Landcover ##################
-# Count occurrences of species "BACS" grouped by landcover
-BACS_counts_landcover <- merged_data %>%
-  filter(species == "BACS") %>%  # Retain only rows where species is "BACS"
-  group_by(landcover) %>%        # Group the data by landcover
-  summarise(count = n())         # Count the number of occurrences within each landcover group
-
-# Print the counts of "BACS" grouped by landcover
-print(BACS_counts_landcover)
-
-################ WMA and Landcover ##################
-# Count occurrences of species "BACS" grouped by both WMA and landcover
-BACS_counts_wma_landcover <- merged_data %>%
-  filter(species == "BACS") %>%  # Retain only rows where species is "BACS"
-  group_by(wma, landcover) %>%   # Group the data by WMA and landcover
-  summarise(count = n())         # Count the number of occurrences within each WMA-landcover group
-
-# Print the counts of "BACS" grouped by WMA and landcover
-print(BACS_counts_wma_landcover)
-```
-
-## AMKE
-
-### AMKE Grouped by WMA, Landcover, and WMA & Landcover
-
-```{r}
-
-################ WMA ##################
-#Count occurences of species "AMKE" grouped by WMA 
-AMKE_counts_wma <- merged_data %>%
-  filter(species == "AMKE") %>%  # Retain only rows where species is "AMKE"
-  group_by(wma) %>%              # Group the data by WMA
-  summarise(count = n())         # Count the number of occurrences within each WMA group
-
-# Print the counts of "AMKE" grouped by WMA
-print(AMKE_counts_wma)
-
-################ Landcover ##################
-# Count occurrences of species "AMKE" grouped by landcover
-AMKE_counts_landcover <- merged_data %>%
-  filter(species == "AMKE") %>%  # Retain only rows where species is "AMKE"
-  group_by(landcover) %>%        # Group the data by landcover
-  summarise(count = n())         # Count the number of occurrences within each landcover group
-
-# Print the counts of "AMKE" grouped by landcover
-print(AMKE_counts_landcover)
-
-################ WMA and Landcover ##################
-# Count occurrences of species "AMKE" grouped by both WMA and landcover
-AMKE_counts_wma_landcover <- merged_data %>%
-  filter(species == "AMKE") %>%  # Retain only rows where species is "AMKE"
-  group_by(wma, landcover) %>%   # Group the data by WMA and landcover
-  summarise(count = n())         # Count the number of occurrences within each WMA-landcover group
-
-# Print the counts of "AMKE" grouped by WMA and landcover
-print(AMKE_counts_wma_landcover)
-```
 
 ## Target Species
 
