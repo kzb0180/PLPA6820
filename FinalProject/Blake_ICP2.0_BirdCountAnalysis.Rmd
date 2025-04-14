@@ -132,7 +132,7 @@ merged_data <- left_join(points, merged_data, by = "pointId2")
 # Species-Specific Exploration
 Investigating the wildlife management areas and landcover types the focal species are on. 
 
-![Figure 1. Landcover Classifications on 9 Wildlife Management Areas](//FinalProject//Landcover.png)
+![Figure 1. Landcover Classifications on 9 Wildlife Management Areas](/FinalProject/Landcover.png)
 
 ```{r}
 #Function to calculate focal species (Northern Bobwhite, Bachman's sparrow, Prairie Warbler, and American Kestrel)
@@ -402,7 +402,8 @@ fig_combined
 
 ```
 
-![Figure 2. Landcover classifications at Perdido River WMA with count of target species in each landcover type ](//FinalProject//targetspecies_PR.jpeg)
+![Figure 2. Landcover classifications at Perdido River WMA with count of target species in each landcover type ](/FinalProject/targetspecies_PR.jpeg)
+**RUN SOME ANOVA TESTS TO DETERMINE SIGNIFICANCE**
 
 ## All Species from 2024 Point Count Season
 
