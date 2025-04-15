@@ -24,6 +24,7 @@ I or someone else must be able to download your project. run the code, have it m
 ```{r}
 #Load in packages
 library(readxl)
+library(knitr)
 library(dplyr)
 library(ggplot2)
 library(cowplot)
@@ -128,11 +129,74 @@ merged_data = merged_data[,-2] # removes redundant pointID1, since it's also in 
 merged_data <- left_join(points, merged_data, by = "pointId2")
 ```
 
+# Investigating 2024 Point Count Data to Determine Focal Species
 
-# Species-Specific Exploration
-Investigating the wildlife management areas and landcover types the focal species are on. 
 
-![Figure 1. Landcover Classifications on 9 Wildlife Management Areas](/FinalProject/Landcover.png)
+![Figure 1. Map of Alabama and 9 Wildlife Management Areas](FinalProject\Map_Alabama.jpg)
+
+![Figure 2. Landcover Classifications on 9 Wildlife Management Areas](FinalProject\Landcover.png)
+
+```{r}
+#------------------------------------Counts of 2024 Point Count Bird Data --------------------------------------------------------------
+# Count species occurrences and sort them from greatest to least
+species_abundance <- merged_data %>%
+  group_by(species) %>%           # Group by species
+  summarise(count = n()) %>%      # Count occurrences
+  arrange(desc(count))            # Sort by count in descending order
+
+species_abundance
+
+
+################# TESTING SPECIES SUITABILITY ############################################
+
+#Bachman's sparrow is a species of concern in low numbers throughout the state of Alabama so I am looking to see where in the state Northern Bobwhite and Bachman's sparrow co-occured in 2024. 
+
+target_species <- c("NOBO", "BACS")
+
+# Find WMAs with at least two pre-determined species
+wma_with_target_species <- merged_data %>%
+  filter(species %in% target_species) %>% #filter by nobo and bacs
+  group_by(wma) %>% 
+  summarise(target_species_count = n_distinct(species)) %>% #get a count of target species 
+  filter(target_species_count >= 2) %>% #include ones where only greater or equal to 2
+  pull(wma) #only extract info about one column (wma) 
+
+print(wma_with_target_species) #WMA with target species = Fred T. Simpson (FS), Perdido River (PR)
+
+#Assess non-abundant species in selected WMAs (FS and PR) -- analyze species within these WMAs to identify candidates for inclusion based on abundance
+
+allspecies_counts <- merged_data %>%
+  filter(wma %in% wma_with_target_species) %>%
+  group_by(species,wma) %>%
+  summarise(total_count = n()) %>%
+  arrange(total_count) #Sort by abundance (least to most)
+
+
+#------------------------Evaluate Habitat Suitability for Target Species--------------------------------------
+
+# Analyze species counts by landcover in target WMAs
+allspecies_by_landcover <- merged_data %>%
+  filter(wma %in% wma_with_target_species) %>%
+  group_by(species, landcover) %>%
+  summarise(total_count = n()) %>%
+  arrange(desc(total_count))
+
+
+#Combine Criteria (habitat suitability, WMAs with target species, not overly abundant but with potential response)
+
+allspecies_by_landcover_Wma <- merged_data %>%
+  filter(wma %in% wma_with_target_species) %>%
+  group_by(species,landcover,wma) %>%
+  summarise(total_count = n()) %>%
+  arrange(desc(total_count))
+
+```
+Based on the literature and 2024 Point Counts, Prairie Warblers are a bird who share similar ecological niches as Bachman's sparrow and Northern Bobwhite, and are in low to moderate numbers on Perdido River and Fred T. Simpson wildlife management areas (WMA). Because only one Bachman's sparrow was found in Fred T. Simpson WMA, we are choosing to conduct our social information experiment, using broadcast and playback recording devices, in Perdido River WMA where the sample size was larger (n=13). 
+
+# Target Species-Specific Exploration
+
+*Investigating the wildlife management areas and landcover types the focal species are on.*
+
 
 ```{r}
 #Function to calculate focal species (Northern Bobwhite, Bachman's sparrow, Prairie Warbler, and American Kestrel)
@@ -382,15 +446,15 @@ fig_PRAW
 
 ```{r}
 
-# Modify fig_NOBO and fig_BACS to remove x-axis labels for combining figures
-fig_NOBO <- fig_NOBO + theme(axis.text.x = element_blank(), axis.title.x = element_blank())
-fig_BACS <- fig_BACS + theme(axis.text.x = element_blank(), axis.title.x = element_blank())
+#Changing title of figures to common names of the target species 
+fig_NOBO <- fig_NOBO + labs(title = "Northern Bobwhite")
+fig_BACS <- fig_BACS + labs(title = "Bachman's Sparrow")
+fig_PRAW <- fig_PRAW + labs(title = "Prairie Warbler")
 
 #Make a figure combining all three target species on each type of landcover 
 fig_combined <-
   ggarrange(fig_NOBO, fig_BACS, fig_PRAW,
-          ncol = 1, 
-          heights = c(1,1,3),
+          ncol = 3,
           common.legend= T,
           legend = "right")
 
@@ -398,12 +462,237 @@ fig_combined <-  annotate_figure(fig_combined, left = text_grob("Points on Perdi
 fig_combined
 
 #Save figure of bar graph of target species. 
-#ggsave("FinalProject\\targetspecies_PR.jpeg", plot = fig_combined, device = "jpeg", width = 8, height = 15)
+ggsave("FinalProject\\targetspecies_PR.jpeg", plot = fig_combined, device = "jpeg", width = 12, height = 6)
 
 ```
 
-![Figure 2. Landcover classifications at Perdido River WMA with count of target species in each landcover type ](/FinalProject/targetspecies_PR.jpeg)
-**RUN SOME ANOVA TESTS TO DETERMINE SIGNIFICANCE**
+![Figure 3. Landcover classifications at Perdido River WMA with count of target species in each landcover type ](FinalProject\targetspecies_PR.jpeg)
+
+# Occupancy Models of Target Species 
+
+##NOBO 
+
+```{r}
+# NOBO Occupancy on WMA Landcover Classifications 
+
+# Load and prepare vegetation data
+points$landcover[points$landcover == "NULL"] <- NA
+points$landcover[points$landcover == 'AL'] <- 'OP'
+points$landcover[points$landcover %in% c('OP', 'DA')] <- 'OP'
+points$landcover[points$landcover %in% c('EAW', 'UAW', 'UAH', 'YH')] <- 'HardwoodWetland'
+points$canopyProp = as.numeric(points$canopyProp)
+points$midstoryProp = as.numeric(points$midstoryProp)
+points$herbaceousProp = as.numeric(points$herbaceousProp)
+points$shrubProp = as.numeric(points$shrubProp)
+points$duffC = as.numeric(points$duffC)
+points$duffN = as.numeric(points$duffN)
+points$duffS = as.numeric(points$duffS)
+points$duffE = as.numeric(points$duffE)
+points$duffW = as.numeric(points$duffW)
+points$measuredSlope = as.numeric(points$measuredSlope)
+points$measuredAspect = as.numeric(points$measuredAspect)
+points = points[points$wma == "PR",]
+
+#Remove individuals where the bird FLUSHED at "Time of First Detection" 
+individuals$timeOfFirstDet[is.na(individuals$timeOfFirstDet)] <- "FLUSHED"
+
+
+#Filter distance 
+filtered_data <- merged_data[!is.na(merged_data$dataSheetNum), ]
+filtered_data <- filtered_data %>%
+  mutate(
+    dist0_4 = ifelse(dist0_4 == 101, NA, dist0_4),
+    dist4_8 = ifelse(dist4_8 == 101, NA, dist4_8),
+    dist8_12 = ifelse(dist8_12 == 101, NA, dist8_12)
+  )
+
+# Create a Data Frame to Review Occupancy Output
+filtered_data <- filtered_data %>%
+  filter(!(is.na(dist0_4) & is.na(dist4_8) & is.na(dist8_12) & filtered_data$species == "NOBO"))
+filtered_data <- filtered_data[filtered_data$probableMisId == 0, ]
+filtered_data <- filtered_data %>%
+  group_by(pointId2) %>%
+  mutate(prawPresence = ifelse(any(species == "PRAW"), 1, 0)) %>%
+  ungroup()
+filtered_data <- filtered_data %>%
+  relocate(prawPresence, .before = 35)
+
+valid_species <- filtered_data %>%
+  filter(!str_starts(species, "XX")) %>%
+  pull(species) %>%
+  unique()
+for (sp in valid_species) {
+  col_name <- paste0(sp, "Presence")
+  filtered_data <- filtered_data %>%
+    group_by(pointId2) %>%
+    mutate(!!col_name := ifelse(any(species == sp), 1, 0)) %>%
+    ungroup()
+}
+presence_cols <- grep("Presence$", colnames(filtered_data), value = TRUE)
+other_cols <- setdiff(colnames(filtered_data), presence_cols)
+filtered_data <- filtered_data %>%
+  select(all_of(other_cols[1:34]), all_of(presence_cols), all_of(other_cols[35:length(other_cols)]))
+
+```
+
+
+###NOBO Specific Model
+
+**Filter data to include only NOBO observations** 
+```{r}
+filtered_data <- filtered_data %>%
+  group_by(dataSheetNum) %>%
+  filter(if (any(species == "NOBO")) {
+    species == "NOBO"
+  } else {
+    row_number() == 1  # Keep at least one row per group
+  }) %>%
+  ungroup()
+```
+
+ 
+## Occupancy Model Preparation and Output
+```{r}
+# Prepare 'merged_data_final' for later reference
+merged_data_final <- filtered_data
+ 
+# Prepare 'pa_df' (presence-absence data frame) for occupancy modeling
+filtered_data <- filtered_data %>%
+  distinct(dataSheetNum, .keep_all = TRUE)  # Remove duplicate surveys
+ 
+pa_df <- filtered_data[, c("pointId2", "dataSheetNum", "survey", "species")] %>%
+  mutate(NOBO = ifelse(species == "NOBO", 1, 0)) %>%
+  select(-dataSheetNum, -species) %>%
+  pivot_wider(names_from = survey, values_from = NOBO, values_fill = list(NOBO = NA)) %>%
+  column_to_rownames(var = "pointId2")  # Set 'pointId2' as row names
+ 
+# Prepare point-level covariates
+point_covs <- merged_data_final[, 1:108] %>% # Adjust to select correct point covariates
+  distinct(pointId2, .keep_all = TRUE)
+ 
+# Prepare survey-level covariates ('obsCovs_list')
+obs_covariate_names <- c("observer", "temperature", "windIcp2", "cloudIcp2", "insectNoise", "trafficNoise", 
+                         "precipitation", "DayOfYear", "scaledTimeOfDay") # Need to add time of day (i.e. hrs since midnight or scaled time of day) after fixing that column
+ 
+obsCovs_list <- list()
+for (covariate in obs_covariate_names) {
+  wide_df <- filtered_data %>%
+    select(pointId2, survey, all_of(covariate)) %>%
+    pivot_wider(names_from = survey, values_from = all_of(covariate), values_fill = setNames(list(NA), covariate)) %>%
+    as.data.frame()
+  rownames(wide_df) <- paste("pointId2", wide_df$pointId2, sep = "")  # Set rownames
+  obsCovs_list[[covariate]] <- wide_df[, -1]  # Remove 'pointId2' column
+}
+ 
+# Create 'unmarkedFrameOccu' object for occupancy modeling
+unmarked_occu_data <- unmarkedFrameOccu(y = pa_df, siteCovs = point_covs, obsCovs = obsCovs_list)
+ 
+# Fit a single occupancy model for 'NOBO' species (entire dataset)
+NOBO_model <- occu(~ observer + scaledTimeOfDay ~ landcover + BACSPresence + PRAWPresence, data = unmarked_occu_data)
+ 
+# View model summary
+summary(NOBO_model)
+```
+
+
+```{r}
+table(points$landcover)
+```
+
+
+# Interpretation of Occupancy Model
+
+**Occupancy (logit-scale)**
+
+- Intercept: The baseline logit of occupancy for the reference landcover category.
+- landcover: The effect of different landcover types on occupancy probability.
+- Estimate: The estimated effect size.
+- SE: Standard error of the estimate.
+- z: The z-value (estimate divided by SE).
+- P(>|z|): The p-value indicating the significance of the effect.
+
+**Detection (logit-scale)**
+
+- Intercept: The baseline logit of detection probability for the reference observer.
+- observer: The effect of different observers on detection probability.
+- scaledTimeOfDay: The effect of the time of day on detection probability.
+
+**Key Points**
+
+- Significant Effects: Look for p-values less than 0.05 to identify significant effects.
+- landcoverUAP: Significant negative effect on occupancy (p = 0.0336).
+- observerJFH, observerJS, observerLAD, observerLKP, observerMSS, observerWMK: Significant positive effects on detection.
+- scaledTimeOfDay: Significant negative effect on detection (p = 0.000968).
+
+**AIC (Akaike Information Criterion)**
+
+-AIC: A measure of model fit. Lower values indicate a better fit.
+Number of Sites
+-85 sites were included in the analysis.
+Sites removed due to NA: Sites 8, 10, 45, and 66 were excluded due to missing data.
+
+**Landcover Table**
+
+EAP: 31 points
+HardwoodWetland: 10 points
+MPH: 9 points
+OP: 15 points
+UAP: 8 points
+YP: 20 points
+
+# Results of Occupancy Model
+
+For all 9 WMAs: The model shows that across all WMAs, the following have a positive effect on NOBO presence, but none of them are significatn:
+- Young Pine(YP)
+- Open Areas (OP)
+- Even-Aged Pine (EAP)
+
+For Perdidio River: The model shows that the intercept here, being Even-Aged Pine, has a positive effect on occupancy of Northern Bobwhite (2.03 on logit-scale). In other words, Northern Bobwhite have an 88.4% chance of occupying that habitat type. This positive effect is insignificant (p-value: 0.101). However, this model can still be used in decision making for point placement of playback and recording devices in suitable habitat for NOBO.
+
+```{r}
+kable(summary(NOBO_model))
+plogis(2.03)
+```
+
+
+```{r}
+
+
+# Example data
+occupancy_results <- data.frame(
+  landcover = c("EAP", "HardwoodWetland", "MPH", "OP", "UAP", "YP"),
+  estimate = c(2.03, -2.71, 11.91, 15.11, -3.55, -1.16),
+  se = c(1.26, 1.52, 584.13, 4332.03, 1.67, 1.41)
+)
+
+# Enhanced Plotting with effect size on x-axis, no y-axis, annotations, and a legend
+ggplot(occupancy_results, aes(x = estimate, y = landcover, color = landcover)) +
+  geom_point(size = 4) +
+  geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se), height = 0.2, size = 1) +
+  geom_vline(xintercept = 0, linetype = "dashed", size = 1.2, color = "black") +  # Add bold dashed line at x = 0
+  labs(title = "Occupancy Estimates by Landcover Type",
+       subtitle = "With 95% Confidence Intervals",
+       x = "Estimate (logit-scale)",
+       color = "Landcover Type") +  # Add legend title
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+    plot.subtitle = element_text(size = 16, hjust = 0.5),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.major = element_line(color = "gray80"),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_color_brewer(palette = "Set2") +
+  xlim(-15, 15)   # Adjust the limits as needed
+```
+
+
+
+
+```
+
 
 ## All Species from 2024 Point Count Season
 
@@ -497,101 +786,6 @@ pie_landcover <-
 ```
 
 
-
-```{r}
-#------------------------------------Help me determine species --------------------------------------------------------------
-# Count species occurrences and sort them from greatest to least
-species_abundance <- merged_data %>%
-  group_by(species) %>%           # Group by species
-  summarise(count = n()) %>%      # Count occurrences
-  arrange(desc(count))            # Sort by count in descending order
-
-# View the result
-print(species_abundance)
-
-#----------------------------------- Highest count of target species  by WMA ----------------------------------
-# Filter the dataset for the desired species
-desired_species <- c("NOBO", "BACS")
-
-# Calculate the wma with highest sum of desired target species
-max_desiredspecies_wma <- merged_data %>%
-  group_by(wma) %>%                               # Group by WMA
-  summarise(desired_count = sum(species %in% desired_species)) %>% 
-  arrange(desc(desired_count)) 
-
-max_desiredspecies_landcover <- merged_data %>%
-  group_by(landcover) %>%                               # Group by WMA
-  summarise(desired_count = sum(species %in% desired_species)) %>% 
-  arrange(desc(desired_count)) 
-
-################# TESTING SPECIES SUITABILITY ############################################
-# Pre-determined species
-pre_determined_species <- c("NOBO", "BACS")
-
-# Find WMAs with at least two pre-determined species
-wma_with_target_species <- merged_data %>%
-  filter(species %in% pre_determined_species) %>% #filter by nobo and bacs
-  group_by(wma) %>% 
-  summarise(target_species_count = n_distinct(species)) %>% #get a count of target species 
-  filter(target_species_count >= 2) %>% #include ones where only greater or equal to 2
-  pull(wma) #only extract info about one column (wma) 
-
-print(wma_with_target_species) #WMA with target species = Fred T. Simpson (FS), Perdido River (PR)
-
-#Assess non-abundant species in selected WMAs -- analyze species within these WMAs to identify candidates for inclusion based on abundance
-
-allspecies_counts <- merged_data %>%
-  filter(wma %in% wma_with_target_species) %>%
-  group_by(species,wma) %>%
-  summarise(total_count = n()) %>%
-  arrange(total_count) #Sort by abundance (least to most)
-
-
-#------------------------Evaluate Habitat Suitability for Target Species--------------------------------------
-
-# Analyze species counts by landcover in target WMAs
-allspecies_by_landcover <- merged_data %>%
-  filter(wma %in% wma_with_target_species) %>%
-  group_by(species, landcover) %>%
-  summarise(total_count = n()) %>%
-  arrange(desc(total_count))
-
-
-#Combine Criteria (habitat suitability, WMAs with target species, not overly abundant but with potential response)
-
-allspecies_by_landcover_Wma <- merged_data %>%
-  filter(wma %in% wma_with_target_species) %>%
-  group_by(species,landcover,wma) %>%
-  summarise(total_count = n()) %>%
-  arrange(desc(total_count))
-
-######################Put merged data into shape file#######################################
-# Load required libraries
-
-library(sf)
-
-# Check the column names
-print(colnames(merged_data))
-
-# Ensure 'longitudeWGS84' and 'latitudeWGS84' are numeric
-merged_data$longitudeWGS84 <- as.numeric(merged_data$longitudeWGS84)
-merged_data$latitudeWGS84 <- as.numeric(merged_data$latitudeWGS84)
-
-# Check for NAs
-print(sum(is.na(merged_data$longitudeWGS84)))
-print(sum(is.na(merged_data$latitudeWGS84)))
-
-# Convert to an sf object (Simple Features)
-WMAshapefile_data <- st_as_sf(merged_data, coords = c("longitudeWGS84", "latitudeWGS84"), crs = 4326)
-
-# Check if the conversion was successful
-print(WMAshapefile_data)
-
-plot(WMAshapefile_data["geometry"])
-
-# Save as a shapefile
-st_write(WMAshapefile_data, "C:/Users/kzb0180/OneDrive - Auburn University/ValenteGitHub/ICP/Kylie Blake/WMAdata.shp", driver = "ESRI Shapefile")
-```
 
 ```{r}
 ######################Calculate Stats on WMAs#############################
