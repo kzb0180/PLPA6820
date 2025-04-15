@@ -6,7 +6,7 @@ output:
   html_document:
     toc: true #table of contents 
     toc_float: true #makes a table of contents on side
-  md_doucment:
+  md_document:
     variant: gfm
 ---
 
