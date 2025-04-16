@@ -19,7 +19,9 @@ Must have a README file - 10 points
 Must be in an R project - 5 points 
 I or someone else must be able to download your project. run the code, have it make sense, and reproduce it! - 25 points
 
-##Load in Packages and Excel Workbooks
+# Data Preparation
+
+## Load in Packages and Excel Workbooks
 
 ```{r}
 #Load in packages
@@ -44,7 +46,7 @@ library(stringr)
 library(unmarked)
 ```
 
-##Load in Excel Workbooks and Tidy the Data
+## Load in Excel Workbooks 
 
 ```{r}
 #Load in necessary workboooks
@@ -61,11 +63,11 @@ birds = individuals %>%
   pivot_wider(names_from = interval, values_from = distanceIcp2)
 ```
 
-###Tidy Data
-Combining 
-1. Date and Time Conversion: It converts date and time columns into a single DateTime column, computes hours since midnight, and scales the time of day. Filtering: It filters out surveys conducted before a specific cutoff date (May 13th, 2024).Survey Labeling: It assigns survey labels based on the chronological order within each pointId2.Data Cleaning: It converts 'FLUSHED' values in the 'Time of 1st Detection' column to -1 so the column is read as an integer string.
-2. Merge the surveyLevel (bird data) and pointLevel (vegetation data) together by pointId2. Each point had a unique pointId2 that links bird and vegetation data together.
-3. Add the individual level species data to the merged data from step 1. merge them by dataSheetNum, which links the Survey Level to individual level. 
+## Tidy Data
+- Date and Time Conversion: It converts date and time columns into a single DateTime column, computes hours since midnight, and scales the time of day. 
+- Filtering: It filters out surveys conducted before a specific cutoff date (May 13th, 2024).Survey Labeling: It assigns survey labels based on the chronological order within each pointId2.Data Cleaning: It converts 'FLUSHED' values in the 'Time of 1st Detection' column to -1 so the column is read as an integer string.
+- Merge the surveyLevel (bird data) and pointLevel (vegetation data) together by pointId2. Each point had a unique pointId2 that links bird and vegetation data together.
+- Add the individual level species data to the merged data from step 1. and merge them by dataSheetNum, which links the survey level to individual level. 
 
 ```{r}
 # Convert date and time columns to single Date Time Column
@@ -112,10 +114,9 @@ birds$timeOfFirstDet <- as.integer(birds$timeOfFirstDet)  # Convert to integer
 class(birds$timeOfFirstDet)  # Check the class of the column
 table(birds$timeOfFirstDet)  # View frequency table of values
 
-```
+#-------------------------------------------------------------
+# Step 4: Merging together data to m ake final "merged_data" fram for analysis
 
-
-```{r}
 #Merge pointLevel covariates into surveyLevel by matching column 'pointId2'
 merged_data <- surveys %>%
   left_join(points, by = "pointId2")  # Perform a left join to preserve all rows in surveyLevel
@@ -127,6 +128,7 @@ merged_data <- merged_data %>%
 
 # Merge 'surveys' and 'birds' data sets using the 'dataSheetNum' column
 merged_data <- left_join(surveys, birds, by = "dataSheetNum")
+
 # Merge merged data and 'points' using 'pointId2' column
 merged_data = merged_data[,-2] # removes redundant pointID1, since it's also in points
 merged_data <- left_join(points, merged_data, by = "pointId2")
@@ -136,7 +138,11 @@ merged_data <- left_join(points, merged_data, by = "pointId2")
 
 ![Figure 1. Map of Alabama and 9 Wildlife Management Areas](Map_Alabama.jpg)
 
+
+
 ![Table 1. Landcover Classifications on 9 Wildlife Management Areas](Landcover.png)
+
+
 ```{r}
 # Landcover across WMAs
 landcover <- merged_data %>% 
@@ -179,7 +185,10 @@ pie_landcover <-
 ggsave("FinalProject\\landcover_distribution.jpeg", plot = pie_landcover, device = "jpeg", width = 8, height = 6)
 
 ```
+
+
 ![Figure 2. Landcover Distribution Across 9 Wildlife Management Areas](landcover_distribution.jpeg)
+
 
 ```{r}
 #------------------------------------Counts of 2024 Point Count Bird Data --------------------------------------------------------------
@@ -370,7 +379,7 @@ ggplotly(p, tooltip = "text")
 
 ## Perdido River WMA 
 
-- Exploring the southern most WMA where target species were all present in 2024. 
+*Exploring the southern most WMA where target species were all present in 2024.* 
 
 ```{r}
 
@@ -413,11 +422,12 @@ target_landcovergraph <-  ggplot() +
     aes(x = species, y = count, color = landcover),
     shape=20,
     size = 5)+
+  theme_minimal() +
   labs(
     title = "Target Species Count on Categorized Landcover Types at Perdido River WMA"
   )
 ggplotly(target_landcovergraph)
-#Detection per number of site in that category
+#Detection per number of sites in that category
 
 ```
 
@@ -428,7 +438,7 @@ ggplotly(target_landcovergraph)
 
 ```{r}
 filtered_data <- merged_data %>%
-  filter(wma == "PR")
+  filter(wma == "PR") #filter by Perdido River WMA
 
 # Calculate the total number of distinct pointID2s for each landcover type
 total_points <- filtered_data %>%
@@ -513,24 +523,21 @@ ggsave("FinalProject\\targetspecies_PR.jpeg", plot = fig_combined, device = "jpe
 
 ![Figure 3. Landcover classifications at Perdido River WMA with count of target species in each landcover type ](targetspecies_PR.jpeg)
 
+# Occupancy Modelling
+
+## Preparing Data for Occupancy Model
+
 ```{r}
-# Load in Veg Data and Clean Up for Modelling
+# Prep vegetation Data for Modelling
 
 points$landcover[points$landcover == "NULL"] <- NA
 points$landcover[points$landcover == 'AL'] <- 'OP'
 points$landcover[points$landcover %in% c('OP', 'DA')] <- 'OP'
 points$landcover[points$landcover %in% c('EAW', 'UAW', 'UAH', 'YH')] <- 'HardwoodWetland'
-points$canopyProp = as.numeric(points$canopyProp)
-points$midstoryProp = as.numeric(points$midstoryProp)
-points$herbaceousProp = as.numeric(points$herbaceousProp)
-points$shrubProp = as.numeric(points$shrubProp)
-points$duffC = as.numeric(points$duffC)
-points$duffN = as.numeric(points$duffN)
-points$duffS = as.numeric(points$duffS)
-points$duffE = as.numeric(points$duffE)
-points$duffW = as.numeric(points$duffW)
-points$measuredSlope = as.numeric(points$measuredSlope)
-points$measuredAspect = as.numeric(points$measuredAspect)
+#change all below points to numeric
+pts_num <- c("canopyProp", "midstoryProp", "herbaceousProp", "shrubProp", "duffC", "duffN", "duffS", "duffE", "duffW", "measuredSlope", "measuredAspect") #creating vector to change columns to numeric from character
+points[pts_num] <- lapply(points[pts_num], as.numeric) #lapply is used to change vector variables into numeric columns
+
 points = points[points$wma == "PR",]  # Subset points for PR only
 
 
@@ -539,22 +546,37 @@ birds = individuals %>%
   left_join(detections, by = "individualId") %>%
   pivot_wider(names_from = interval, values_from = distanceIcp2)
 
-# Convert date and time columns to single Date Time Column
+# Convert the 'date' column to Date format
 surveys$date <- as.Date(surveys$date, format = "%d %b %Y")
+
+# Perform data manipulation on the 'surveys' dataframe
 surveys <- surveys %>%
   mutate(
+    # Extract only the time part from 'startTime' and format it as "HH:MM:SS"
     timeOnly = format(as.POSIXct(startTime, format="%Y-%m-%d %H:%M:%S"), "%H:%M:%S"),
+    
+    # Calculate hours since midnight from 'startTime'
     hrsSinceMidnight = hour(as.POSIXct(startTime, format="%Y-%m-%d %H:%M:%S")) +
       minute(as.POSIXct(startTime, format="%Y-%m-%d %H:%M:%S")) / 60 +
       second(as.POSIXct(startTime, format="%Y-%m-%d %H:%M:%S")) / 3600,
+    
+    # Scale the 'hrsSinceMidnight' to have mean 0 and standard deviation 1
     scaledTimeOfDay = scale(hrsSinceMidnight, center = TRUE, scale = TRUE)[,1]
   )
+
+# Define a cutoff date for filtering (May 13th, 2024 was the start of 2024 Point Count Season)
 cutoff_date <- as.POSIXct("2024-05-13", format = "%Y-%m-%d")
+
+# Filter the 'surveys' dataframe to include only rows where 'date' is after the cutoff date
 surveys <- surveys %>% filter(date > cutoff_date)
+
+# Add a new column 'DayOfYear' representing the day of the year from the 'date' column
 surveys$DayOfYear <- yday(surveys$date)
 
-# Assign survey labels based on the chronological order within each pointId2
+# Initialize the 'survey' column with NA values
 surveys$survey <- NA
+
+# Assign survey labels based on the chronological order within each 'pointId2'
 surveys <- surveys %>%
   group_by(pointId2) %>%
   arrange(date, .by_group = TRUE) %>%
@@ -569,13 +591,14 @@ table(birds$timeOfFirstDet)
 
 # Merge 'surveys' and 'birds' data sets using the 'dataSheetNum' column
 merged_data <- left_join(surveys, birds, by = "dataSheetNum")
+
 # Merge merged data and 'points' using 'pointId2' column
 merged_data = merged_data[,-2]  # Removes redundant pointID1
 merged_data <- left_join(points, merged_data, by = "pointId2")
 ```
 ```{r}
 # Filter out rows where no bird surveys were conducted
-filtered_data <- merged_data[!is.na(merged_data$dataSheetNum), ] # Each survey is associated with a Data Sheet #
+filtered_data <- merged_data[!is.na(merged_data$dataSheetNum), ] # Each survey is associated with a Data Sheet Number
  
 # Replace 101 distances with NA for occupancy modeling that will be limited to a 100 m radius
 filtered_data <- filtered_data %>%
@@ -588,17 +611,14 @@ filtered_data <- filtered_data %>%
 
 ## Data Frame for later quality check
 
-**Create a Data Frame to Review Occupancy Output**
+*Create a Data Frame to Review Occupancy Output*
 
 ```{r}
-# qc_df = filtered_data
  
 # Remove rows where all three distance columns are NA for the species of interest ('NOBO')
 filtered_data <- filtered_data %>%
   filter(!(is.na(dist0_4) & is.na(dist4_8) & is.na(dist8_12) & filtered_data$species == "NOBO"))
  
-# Data Frame for later quality check
-# qc_df2 = filtered_data
  
 # Remove rows where 'Probable MisID' column has a value of 1 (indicating a misidentification)
 filtered_data <- filtered_data[filtered_data$probableMisId == 0, ]
@@ -615,34 +635,47 @@ filtered_data <- filtered_data %>%
 
 
 # Step 1: Identify species to include (excluding those starting with "XX")
+
 valid_species <- filtered_data %>%
   filter(!str_starts(species, "XX")) %>% #if character string starts with XX, remove these
   pull(species) %>%
-  unique()
+  unique() #unique species 
  
 # Step 2: Loop over each species and create presence columns
+
+# Loop through each species in the 'valid_species' vector
 for (sp in valid_species) {
-  col_name <- paste0(sp, "Presence")  # Generate dynamic column name
+  # Generate a dynamic column name by appending "Presence" to the species name
+  col_name <- paste0(sp, "Presence")
+  # Perform data manipulation on the 'filtered_data' dataframe
   filtered_data <- filtered_data %>%
+    # Group the data by 'pointId2'
     group_by(pointId2) %>%
+    # Create a new column with the species name. The column will have a value of 1 if the species is present in the group, otherwise 0
     mutate(!!col_name := ifelse(any(species == sp), 1, 0)) %>%
+    # Ungroup the data
     ungroup()
 }
- 
+
 # Step 3: Move new presence columns to start at the 35th position
+
 presence_cols <- grep("Presence$", colnames(filtered_data), value = TRUE)  # Identify new presence columns
 other_cols <- setdiff(colnames(filtered_data), presence_cols)  # Other columns
  
 #Step 4: Reorder dataframe: Keep original columns, but insert presence columns at position 35
+
 filtered_data <- filtered_data %>%
   select(all_of(other_cols[1:34]), all_of(presence_cols), all_of(other_cols[35:length(other_cols)]))
 ```
 
 
-###NOBO Specific Model
+## NOBO Occupancy Model
 
-**Filter data to include only NOBO observations** 
+### Occupancy Model Preparation and Output
+
 ```{r}
+#Filter data to include only NOBO observations
+
 filtered_data <- filtered_data %>%
   group_by(dataSheetNum) %>%
   filter(if (any(species == "NOBO")) {
@@ -654,7 +687,7 @@ filtered_data <- filtered_data %>%
 ```
 
  
-## Occupancy Model Preparation and Output
+
 ```{r}
 # Prepare 'merged_data_final' for later reference
 merged_data_final <- filtered_data
@@ -674,19 +707,28 @@ point_covs <- merged_data_final[, 1:108] %>% # Adjust to select correct point co
   distinct(pointId2, .keep_all = TRUE)
  
 # Prepare survey-level covariates ('obsCovs_list')
-obs_covariate_names <- c("observer", "temperature", "windIcp2", "cloudIcp2", "insectNoise", "trafficNoise", 
-                         "precipitation", "DayOfYear", "scaledTimeOfDay") # Need to add time of day (i.e. hrs since midnight or scaled time of day) after fixing that column
+obs_covariate_names <- c("observer", "temperature", "windIcp2", "cloudIcp2", "insectNoise", "trafficNoise", "precipitation", "DayOfYear", "scaledTimeOfDay") # Need to add time of day (i.e. hrs since midnight or scaled time of day) after fixing that column
  
+# Initialize an empty list to store the observation covariates
 obsCovs_list <- list()
+
+# Loop through each covariate name in the 'obs_covariate_names' vector
+
 for (covariate in obs_covariate_names) {
+  # Perform data manipulation on the 'filtered_data' dataframe
   wide_df <- filtered_data %>%
+    # Select the 'pointId2', 'survey', and the current covariate columns
     select(pointId2, survey, all_of(covariate)) %>%
+    # Pivot the dataframe to a wider format with 'survey' as column names
     pivot_wider(names_from = survey, values_from = all_of(covariate), values_fill = setNames(list(NA), covariate)) %>%
+    # Convert the resulting tibble to a dataframe
     as.data.frame()
-  rownames(wide_df) <- paste("pointId2", wide_df$pointId2, sep = "")  # Set rownames
-  obsCovs_list[[covariate]] <- wide_df[, -1]  # Remove 'pointId2' column
+  # Set the row names of the dataframe using 'pointId2'
+  rownames(wide_df) <- paste("pointId2", wide_df$pointId2, sep = "")
+  # Store the dataframe in the list, excluding the 'pointId2' column
+  obsCovs_list[[covariate]] <- wide_df[, -1]
 }
- 
+
 # Create 'unmarkedFrameOccu' object for occupancy modeling
 unmarked_occu_data <- unmarkedFrameOccu(y = pa_df, siteCovs = point_covs, obsCovs = obsCovs_list)
  
@@ -703,8 +745,11 @@ summary(NOBO_model)
 **Landcover Table**
 
 ```{r}
+#Look at a table of landcover on Perdido River WMA and how many points are there 
+
 table(points$landcover)
 ```
+
 
 ![Table 2. Number of Point Count Sites in Each Landcover Type on Perdido River WMA](PR_PointsbyLandcover.png)
 
@@ -720,7 +765,7 @@ For Perdidio River: The model shows that the intercept here, being Even-Aged Pin
 
 ```{r}
 kable(summary(NOBO_model)) #making a table of occupancy outputs using kable function 
-plogis(2.03) #calculating probability of the intercept, 0.8839
+plogis(2.03) #calculating probability of the intercept since 2.03 is it logit scale, result is 0.8839 probability
 
 landcover_model <- as.data.frame(summary(NOBO_model)) #convert summary landcover model to a data frame  
                                  
@@ -728,7 +773,7 @@ landcover_model <- landcover_model[1:6,] #repeats model covariates, so I removed
 
 results <-  landcover_model %>% 
   select(state.Estimate, state.SE) %>%  #only choose estimate and SE columns 
-  rename( #rename them 
+  rename( #rename the columns 
     Estimate = state.Estimate,
     SE = state.SE
   )
@@ -776,6 +821,7 @@ NOBO_occupancy <- ggplot(occupancy_results, aes(x = estimate, y = landcover, col
 ggsave("FinalProject\\NOBOoccupancy.jpeg", plot = NOBO_occupancy, device = "jpeg", width = 8, height = 6)
 ```
 
+
 ![Figure 4. NOBO Occupancy Estimates by Landcover Type. Mixed Pine Hardwood and Openings Standard Error Removed Due to Large Values](NOBOoccupancy.jpeg)
 
 
@@ -786,12 +832,13 @@ Both Praire warblers and Bachman's sparrows have a positive effect on occurpancy
 prawnobo_model <- occu(~ observer + scaledTimeOfDay ~ PRAWPresence, data = unmarked_occu_data) #looking at PRAW presence on NOBO presence
 bacsnobo_model <- occu(~ observer + scaledTimeOfDay ~ BACSPresence, data = unmarked_occu_data) #looking at BACS presence on NOBO presence
 
-kable(summary(prawnobo_model))
-plogis(1.095)
+kable(summary(prawnobo_model)) #creating table of model outputs using kable
+plogis(1.095) #calculating probability of the intercept 
 ```
 ```{r}
-kable(summary(bacsnobo_model))
-plogis(11.035)
+kable(summary(bacsnobo_model)) #creating table of model outputs using kable
+plogis(11.035) #calculating probability of the intercept 
+```
 ```
 
 
