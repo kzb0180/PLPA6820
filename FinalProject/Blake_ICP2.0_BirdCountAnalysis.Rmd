@@ -3,11 +3,11 @@ title: "ICP2.0_2024BirdCountAnalysis"
 author: "Kylie Blake"
 date: "2025-03-05"
 output: 
+  md_document:
+    variant: gfm
   html_document:
     toc: true #table of contents 
     toc_float: true #makes a table of contents on side
-  md_document:
-    variant: gfm
 ---
 
 Final project - you are to use your data from your PhD or Master's research or data from a paper you want to reproduce and write a reproducible workflow using these data. 
